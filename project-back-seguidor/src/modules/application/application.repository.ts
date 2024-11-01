@@ -9,7 +9,7 @@ export class ApplicationRepository {
   constructor(
     @InjectRepository(Application)
     private readonly appRepo: Repository<Application>,
-    @InjectRepository(Application)
+    @InjectRepository(User)
     private readonly userRepo: Repository<User>,
   ) {}
 

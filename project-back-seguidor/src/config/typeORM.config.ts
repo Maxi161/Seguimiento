@@ -21,7 +21,7 @@ export const typeORMconfig = {
   entities: [User, Application, Message],
   synchronize: true,
   logging: ['error', 'query'],
-  dropSchema: true,
+  dropSchema: false,
   migrations: ['dist/.migrations/*{.ts,.js}'],
 };
 

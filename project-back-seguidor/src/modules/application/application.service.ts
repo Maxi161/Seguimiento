@@ -26,16 +26,18 @@ export class ApplicationService {
       comments: appData.comments,
       applicationDate: appData.applicationDate,
       recruiterName: appData.recruiterName,
-      companyContact: appData.contactCompany,
+      companyContact: appData.companyContact,
       industry: appData.industry,
       applicationLink: appData.applicationLink,
-      phoneScreen: appData.phoneScreen,
-      firstInterview: appData.firstInterview,
-      secondInterview: appData.secondInterview,
-      thirdInterview: appData.thirdInterview,
-      extraInterview: appData.additionalInterview,
+      phoneScreen: appData.phoneScreen || null,
+      firstInterview: appData.firstInterview || null,
+      secondInterview: appData.secondInterview || null,
+      thirdInterview: appData.thirdInterview || null,
+      extraInterview: appData.additionalInterview || null,
       user, // Suponiendo que el DTO incluye userId
     };
+
+    console.log(newData);
 
     return await this.appRepo.createApplication(newData);
   }

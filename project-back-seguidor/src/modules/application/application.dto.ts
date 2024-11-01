@@ -21,7 +21,7 @@ export class CreateApplicationDto {
   recruiterName: string;
 
   @IsString()
-  contactCompany: string;
+  companyContact: string;
 
   @IsString()
   industry: string;

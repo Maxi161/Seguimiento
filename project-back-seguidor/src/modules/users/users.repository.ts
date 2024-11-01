@@ -14,6 +14,7 @@ export class UserRepository {
   async getAll() {
     const users = await this.userRepo.find({
       select: ['email', 'id', 'role', 'name'],
+      relations: ['applications'],
     });
     return users;
   }

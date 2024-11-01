@@ -25,7 +25,10 @@ export class User {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.STUDENT })
   role: UserRole;
 
-  @OneToMany(() => Application, (application) => application.user)
+  @OneToMany(() => Application, (application) => application.user, {
+    cascade: true,
+    eager: true,
+  })
   applications: Application[];
 
   @OneToMany(() => Message, (message) => message.sender)

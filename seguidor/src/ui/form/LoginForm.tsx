@@ -1,15 +1,17 @@
 "use client"
 
 import { useUserContext } from "@/context/user.context";
-import { IFormErrors } from "@/helpers/form.dtos";
+import { IFormErrors } from "@/interfaces/form.interfaces";
 import { motion } from "framer-motion"
 import { useState } from "react";
 import InputField from "./FieldForForm";
+import { useRouter } from "next/navigation";
 
 
 const LoginForm = ({ toggleForm }: { toggleForm: () => void }) => {
 
-  const {user, login, isLogged} = useUserContext()
+  const {login} = useUserContext()
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -50,10 +52,12 @@ const LoginForm = ({ toggleForm }: { toggleForm: () => void }) => {
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length === 0) {
       try {
-        console.log(user);
-        login({...formData})
-        alert(isLogged)
-        console.log(user);
+        const success = await login({ ...formData });
+        if (success) {
+          router.push("/");
+        } else {
+          alert("Login failed");
+        }
       } catch (error) {
         console.log(error);
       }
@@ -63,6 +67,7 @@ const LoginForm = ({ toggleForm }: { toggleForm: () => void }) => {
       setErrors(validationErrors);
     }
   };
+
 
     const sectionVariants = {
       hidden: { opacity: 0, y: -100 },

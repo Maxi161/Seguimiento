@@ -6,7 +6,7 @@ import { CreateApplicationDto } from './application.dto';
 export class ApplicationController {
   constructor(private readonly appService: ApplicationService) {}
 
-  @Post('/')
+  @Post()
   async createApp(@Body() data: CreateApplicationDto) {
     const res = await this.appService.createApp(data);
     return res;

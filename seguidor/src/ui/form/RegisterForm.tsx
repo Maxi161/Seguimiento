@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
-import { IFormErrors } from "@/helpers/form.dtos";
+import { IFormErrors } from "@/interfaces/form.interfaces";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
@@ -63,10 +63,12 @@ const RegisterForm = ({ toggleForm }: { toggleForm: () => void} ) => {
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length === 0) {
       try {
-        console.log(user);
-        register({...formData})
-        alert("pichula")
-        console.log(user);
+        const success = await register({ ...formData });
+        if (success) {
+          toggleForm()
+        } else {
+          alert("Login failed");
+        }
       } catch (error) {
         console.log(error);
       }
@@ -76,6 +78,7 @@ const RegisterForm = ({ toggleForm }: { toggleForm: () => void} ) => {
       setErrors(validationErrors);
     }
   };
+  
 
 
   const sectionVariants = {
