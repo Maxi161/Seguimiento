@@ -1,14 +1,22 @@
 "use client"
 import { useUserContext } from "@/context/user.context";
 import FollowView from "@/ui/follow/FollowView";
+import ApplicationForm from "@/ui/form/FormSeguimiento";
 import Header from "@/ui/header/Header";
+import InfoProject from "@/ui/info/Info.";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const Home = () => {
   
+  const [formAppVisible, setFormAppVisible] = useState(false);
   const router = useRouter()
-    const {user, loading, isLogged} = useUserContext()
+  const {user, loading, isLogged} = useUserContext()
+  console.log(user);
+
+  const toggleView = () => {
+    setFormAppVisible((prevShowLogin) => !prevShowLogin);
+  };
 
   useEffect(() => {
     if (!loading && !isLogged) {
@@ -19,11 +27,15 @@ export const Home = () => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="relative h-full w-full z-10 flex flex-col min-h-screen">
+    <div className="relative h-full w-full z-10 min-h-screen">
       <Header />
-      <main>
-        <h1 className="text-5xl">¡Hola {user?.name}!</h1>
-        <FollowView />
+      <main className="flex justify-center items-center flex-col">
+        <section className="w-10/12 m-8 relative">
+        {formAppVisible ? <ApplicationForm toggleView={toggleView}/> : <FollowView toggleView={toggleView} />}
+        </section>
+        <section>
+          <InfoProject />
+        </section>
       </main>
     </div>
   );

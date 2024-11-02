@@ -16,7 +16,7 @@ const initialApplicationState: IApplication = {
   companyContact: "",
   industry: "",
   applicationLink: "",
-  phoneScreen: "",
+  phoneScreen: undefined,
   firstInterview: undefined,
   secondInterview: undefined,
   thirdInterview: undefined,
@@ -26,7 +26,7 @@ const initialApplicationState: IApplication = {
 
 type ApplicationKeys = keyof IApplication;
 
-const ApplicationForm: React.FC = () => {
+const ApplicationForm = ({ toggleView }: { toggleView: () => void}) => {
   const {saveApplication} = useUserContext();
   const [applicationData, setApplicationData] = useState<IApplication>(initialApplicationState);
   const [errors, setErrors] = useState<IApplicationFormErrors>({});
@@ -109,6 +109,7 @@ const ApplicationForm: React.FC = () => {
       className="flex flex-col items-center w-full mt-12"
     >
       <form onSubmit={handleSubmit} className="relative h-32 flex flex-col w-full lg:w-6/12 gap-3 justify-center">
+      <button className="absolute -rotate-90 -top-8 left-0 text-3xl rounded-full hover:rotate-0 hover:text-red-600 transition-all" onClick={toggleView} type="button">{"<"}</button>
         <AnimatePresence mode="wait">
           <InputField
             variants={inputVariants}

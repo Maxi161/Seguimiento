@@ -1,11 +1,11 @@
-import { IApplication } from "./seguimiento.interface";
+import { IApplication, IParsedApplication } from "./seguimiento.interface";
 
 export interface User {
   name: string;
   email: string;
   id: string;
   role: string;
-  applications: IApplication[];
+  applications: IParsedApplication[];
 }
 
 export interface UserContextType {

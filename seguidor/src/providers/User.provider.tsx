@@ -46,7 +46,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const res = await axios.get(`${rutaApi}/application/${user?.email}`)
     const apps = res.data as IApplication[];
-    setUser({...user, applications: {...apps}} as User);
+    setUser({...user, applications: [...apps]} as User);
     localStorage.setItem("user", JSON.stringify(user));
   } catch (error) {
     console.log(error)
