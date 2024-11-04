@@ -28,6 +28,8 @@ export class ApplicationService {
       recruiterName: appData.recruiterName,
       companyContact: appData.companyContact,
       industry: appData.industry,
+      company: appData.company,
+      platform: appData.platform,
       applicationLink: appData.applicationLink,
       phoneScreen: appData.phoneScreen || null,
       firstInterview: appData.firstInterview || null,
@@ -36,8 +38,6 @@ export class ApplicationService {
       extraInterview: appData.additionalInterview || null,
       user, // Suponiendo que el DTO incluye userId
     };
-
-    console.log(newData);
 
     return await this.appRepo.createApplication(newData);
   }

@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Application } from './application.entity';
 import { v4 as uuid } from 'uuid';
 import { Message } from './message.entity';
+import { Connection } from './connections.entity';
 
 export enum UserRole {
   STUDENT = 'student',
@@ -36,4 +37,11 @@ export class User {
 
   @OneToMany(() => Message, (message) => message.receiver)
   receivedMessages: Message[];
+
+  @OneToMany(() => Connection, (connection) => connection.userA)
+  sentConnections: Connection[];
+
+  // Conexiones recibidas por este usuario
+  @OneToMany(() => Connection, (connection) => connection.userB)
+  receivedConnections: Connection[];
 }

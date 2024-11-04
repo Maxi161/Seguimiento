@@ -6,6 +6,7 @@ import { DatabaseModule } from './modules/database/database.module';
 import { UserModule } from './modules/users/users.module';
 import { MessageModule } from './modules/messages/mesaeges.module';
 import { ApplicationModule } from './modules/application/application.module';
+import { ConnectionModule } from './modules/connections/connection.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ApplicationModule } from './modules/application/application.module';
     UserModule,
     ApplicationModule,
     MessageModule,
+    ConnectionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

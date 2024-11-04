@@ -10,6 +10,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { Application } from 'src/entities/application.entity';
 import { Message } from 'src/entities/message.entity';
+import { Connection } from 'src/entities/connections.entity';
 
 export const typeORMconfig = {
   type: 'postgres',
@@ -18,7 +19,7 @@ export const typeORMconfig = {
   username: POSTGRES_DB,
   password: DB_PASSWORD,
   database: DB_NAME,
-  entities: [User, Application, Message],
+  entities: [User, Application, Message, Connection],
   synchronize: true,
   logging: ['error', 'query'],
   dropSchema: false,

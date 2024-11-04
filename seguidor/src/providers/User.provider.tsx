@@ -2,7 +2,7 @@
 
 import { UserContext } from "@/context/user.context";
 import { IApplication } from "@/interfaces/seguimiento.interface";
-import { User } from "@/interfaces/user.interfaces";
+import { IUser } from "@/interfaces/user.interfaces";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 const rutaApi = "http://localhost:3005"
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<IUser | null>(null);
   const [isLogged, setIsLogged] = useState(false);
   const [loading, setLoading] = useState(true); // Nuevo estado de carga
   const router = useRouter();
@@ -18,7 +18,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (credentials: { email: string; password: string }) => {
     try {
       const { data } = await axios.post(`${rutaApi}/user/signin`, { ...credentials });
-      const user: User = data;
+      const user: IUser = data;
       setUser(user);
       setIsLogged(true);
       localStorage.setItem("user", JSON.stringify(user));
@@ -46,7 +46,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const res = await axios.get(`${rutaApi}/application/${user?.email}`)
     const apps = res.data as IApplication[];
-    setUser({...user, applications: [...apps]} as User);
+    setUser({...user, applications: [...apps]} as IUser);
     localStorage.setItem("user", JSON.stringify(user));
   } catch (error) {
     console.log(error)
@@ -59,7 +59,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         // Simulación de registro
         const {data} = await axios.post(`${rutaApi}/user/signup`, {...newUser})
-        const user: User = data
+        const user: IUser = data
 
         localStorage.setItem("user", JSON.stringify(user));
         // router.push("/welcome");
@@ -71,8 +71,44 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
   
-  
-    // Recupera el usuario de `localStorage` si está disponible
+    const downloadData = async () => {
+      try {
+        // Primero, solicita al backend que genere el archivo
+        await axios.post(`${rutaApi}/data/add-data/${user?.email}`);
+        
+        // Luego, solicita el archivo para descargarlo
+        const response = await axios.get(`${rutaApi}/data/${user?.email}`, {
+          responseType: 'blob', // Asegura que la respuesta sea en formato blob
+        });
+    
+        // Crear una URL temporal con el blob del archivo
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+    
+        // Crear un enlace de descarga en memoria
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${user?.email}_data.xlsx`); // Nombre del archivo descargado
+        document.body.appendChild(link);
+    
+        // Disparar la descarga automáticamente
+        link.click();
+    
+        // Limpiar el enlace y la URL temporal después de la descarga
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.log("Error al descargar el archivo", error);
+      }
+    };
+    
+
+    const getUsers = async () => {
+      const res = await axios.get(`${rutaApi}/user`)
+      const users = res.data
+      return users
+    }
+
+    // Recuera el usuario de `localStorage` si está disponible
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -84,7 +120,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
   
     return (
-      <UserContext.Provider value={{ user, isLogged, login, register, logout, saveApplication, loading }}>
+      <UserContext.Provider value={{ user, isLogged, login, register, logout, saveApplication, downloadData, getUsers, loading }}>
         {children}
       </UserContext.Provider>
     );

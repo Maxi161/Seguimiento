@@ -1,9 +1,12 @@
 "use client"
 import { useUserContext } from "@/context/user.context";
+import { IUser } from "@/interfaces/user.interfaces";
 import FollowView from "@/ui/follow/FollowView";
+import Footer from "@/ui/footer/Footer";
 import ApplicationForm from "@/ui/form/FormSeguimiento";
 import Header from "@/ui/header/Header";
 import InfoProject from "@/ui/info/Info.";
+import UserList from "@/ui/user/UserList";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -11,9 +14,8 @@ export const Home = () => {
   
   const [formAppVisible, setFormAppVisible] = useState(false);
   const router = useRouter()
-  const {user, loading, isLogged} = useUserContext()
-  console.log(user);
-
+  const {getUsers, loading, isLogged} = useUserContext()
+  const [users, setUsers] = useState<IUser[]>([])
   const toggleView = () => {
     setFormAppVisible((prevShowLogin) => !prevShowLogin);
   };
@@ -22,7 +24,12 @@ export const Home = () => {
     if (!loading && !isLogged) {
       router.push("/auth");
     }
-  }, [isLogged, loading, router]);
+    const saveUsers = async () => {
+      setUsers(await getUsers());
+    }
+
+    saveUsers()
+  }, [isLogged, loading, router, getUsers]);
 
   if (loading) return <div>Loading...</div>;
 
@@ -36,7 +43,9 @@ export const Home = () => {
         <section>
           <InfoProject />
         </section>
+        <UserList users={users}/>
       </main>
+      <Footer />
     </div>
   );
 }

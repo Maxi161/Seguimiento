@@ -1,6 +1,6 @@
 import { IApplication, IParsedApplication } from "./seguimiento.interface";
 
-export interface User {
+export interface IUser {
   name: string;
   email: string;
   id: string;
@@ -9,7 +9,7 @@ export interface User {
 }
 
 export interface UserContextType {
-  user: User | null;
+  user: IUser | null;
   isLogged: boolean;
   loading: boolean;
   login: (credentials: { email: string; password: string }) => Promise<boolean>;
@@ -21,4 +21,6 @@ export interface UserContextType {
   }) => Promise<boolean>;
   logout: () => void;
   saveApplication: (data: IApplication) => Promise<void>;
+  downloadData: () => Promise<void>;
+  getUsers: () => Promise<IUser[]>;
 }

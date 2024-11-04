@@ -71,10 +71,6 @@ export class UserRepository {
   async signin(email: string, password: string) {
     const userFound = await this.userRepo.findOne({ where: { email } });
 
-    console.log(email);
-    console.log(password);
-    console.log(userFound);
-
     if (!userFound) {
       throw new HttpException({ status: 404, error: 'user not found' }, 404);
     }

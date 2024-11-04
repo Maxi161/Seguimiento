@@ -33,6 +33,9 @@ export class Application {
   recruiterName: string;
 
   @Column()
+  company: string;
+
+  @Column()
   companyContact: string;
 
   @Column()
@@ -41,7 +44,9 @@ export class Application {
   @Column()
   applicationLink: string;
 
-  // Interview fields
+  @Column()
+  platform: string;
+
   @Column({ type: 'date', nullable: true })
   phoneScreen: Date;
 

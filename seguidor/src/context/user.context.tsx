@@ -10,6 +10,8 @@ export const UserContext = createContext<UserContextType>({
   register: async () => false,
   logout: () => {},
   saveApplication: async () => {},
+  downloadData: async () => {},
+  getUsers: async () => [],
 });
 
 export const useUserContext = () => useContext(UserContext);

@@ -10,7 +10,7 @@ import InputField from "./FieldForForm";
 
 const RegisterForm = ({ toggleForm }: { toggleForm: () => void} ) => {
 
-  const {user, register} = useUserContext()
+  const {register} = useUserContext()
 
   const [formData, setFormData] = useState({
     email: '',

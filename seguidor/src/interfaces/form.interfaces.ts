@@ -21,9 +21,11 @@ export interface IApplicationFormErrors {
   applicationDate?: string;
   recruiterName?: string;
   companyContact?: string;
+  company?: string;
   industry?: string;
   applicationLink?: string;
   phoneScreen?: string;
+  platform?: string;
   firstInterview?: string;
   secondInterview?: string;
   thirdInterview?: string;

@@ -21,6 +21,9 @@ export class CreateApplicationDto {
   recruiterName: string;
 
   @IsString()
+  company: string;
+
+  @IsString()
   companyContact: string;
 
   @IsString()
@@ -33,6 +36,9 @@ export class CreateApplicationDto {
   @IsOptional()
   @IsDate()
   phoneScreen?: Date;
+
+  @IsString()
+  platform: string;
 
   @IsOptional()
   @IsDate()

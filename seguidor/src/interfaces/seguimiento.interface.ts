@@ -9,6 +9,8 @@ export interface IApplication {
   companyContact: string;
   industry: string;
   applicationLink: string;
+  platform: string;
+  company: string;
   phoneScreen: Date | undefined;
   firstInterview: Date | undefined;
   secondInterview: Date | undefined;
@@ -28,6 +30,8 @@ export interface IParsedApplication {
   companyContact: string;
   industry: string;
   applicationLink: string;
+  company: string;
+  platform: string;
   phoneScreen: string | undefined;
   firstInterview: string | undefined;
   secondInterview: string | undefined;

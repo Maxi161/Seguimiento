@@ -53,12 +53,12 @@ export class DataController {
     const exportDir = path.join(__dirname, '..', 'exports');
     const filePath = path.join(exportDir, `${email}_data.xlsx`);
 
-    // Create export directory if it doesn't exist
+    // Crear el directorio de exportación si no existe
     if (!fs.existsSync(exportDir)) {
       fs.mkdirSync(exportDir);
     }
 
-    // Retrieve the user and their applications by email
+    // Obtener el usuario y sus aplicaciones por email
     const user = await this.userRepo.findOne({
       where: { email },
       relations: ['applications'],
@@ -69,24 +69,26 @@ export class DataController {
     }
 
     const applicationsData = user.applications.map((app) => ({
-      applicationId: app.id,
-      status: app.status,
-      position: app.position,
-      actions: app.actions,
-      comments: app.comments,
-      applicationDate: app.applicationDate,
-      recruiterName: app.recruiterName,
-      companyContact: app.companyContact,
-      industry: app.industry,
-      applicationLink: app.applicationLink,
-      phoneScreen: app.phoneScreen,
-      firstInterview: app.firstInterview,
-      secondInterview: app.secondInterview,
-      thirdInterview: app.thirdInterview,
-      extraInterview: app.extraInterview,
+      ID: app.id,
+      estado: app.status,
+      empresa: app.company,
+      pisicion: app.position,
+      acciones: app.actions,
+      comentarios: app.comments,
+      fecha_postulacion: app.applicationDate,
+      nobmre_reclutador: app.recruiterName,
+      contacto_empresa: app.companyContact,
+      rubro: app.industry,
+      link_postulacion: app.applicationLink,
+      plataforma: app.platform,
+      filtro_telefonico: app.phoneScreen,
+      primera_entrevista: app.firstInterview,
+      segunda_entrevista: app.secondInterview,
+      tercer_entrevista: app.thirdInterview,
+      entrevista_extra: app.extraInterview,
     }));
 
-    // Load or create Excel workbook
+    // Cargar o crear el libro de Excel
     let workbook;
     if (fs.existsSync(filePath)) {
       workbook = XLSX.readFile(filePath);
@@ -94,11 +96,22 @@ export class DataController {
       workbook = XLSX.utils.book_new();
     }
 
-    // Add user data to the workbook
-    const worksheet = XLSX.utils.json_to_sheet(applicationsData);
-    XLSX.utils.book_append_sheet(workbook, worksheet, `${email} Data`);
+    const sheetName = `${email} Data`;
 
-    // Write the updated workbook
+    // Eliminar la hoja si ya existe
+    if (workbook.Sheets[sheetName]) {
+      delete workbook.Sheets[sheetName];
+      const sheetIndex = workbook.SheetNames.indexOf(sheetName);
+      if (sheetIndex !== -1) {
+        workbook.SheetNames.splice(sheetIndex, 1);
+      }
+    }
+
+    // Añadir los datos actualizados a la nueva hoja
+    const worksheet = XLSX.utils.json_to_sheet(applicationsData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+
+    // Guardar el libro actualizado
     XLSX.writeFile(workbook, filePath);
 
     return {

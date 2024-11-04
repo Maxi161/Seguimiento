@@ -16,12 +16,14 @@ const initialApplicationState: IApplication = {
   companyContact: "",
   industry: "",
   applicationLink: "",
+  company: "",
   phoneScreen: undefined,
   firstInterview: undefined,
   secondInterview: undefined,
   thirdInterview: undefined,
   extraInterview: undefined,
   userId: "",
+  platform: "" // Nueva propiedad agregada aquí
 };
 
 type ApplicationKeys = keyof IApplication;
@@ -33,10 +35,11 @@ const ApplicationForm = ({ toggleView }: { toggleView: () => void}) => {
   const [currentIndex, setCurrentIndex] = useState(0); // Índice del campo actual
 
   const inputFields = [
+    { label: "Empresa", name: "company", type: "text"},
     { label: "Estado de Postulación", name: "status", type: "text" },
     { label: "Posición", name: "position", type: "text" },
     { label: "Fecha de Postulación", name: "applicationDate", type: "date" },
-    { label: "Plataforma", name: "companyContact", type: "text" },
+    { label: "Plataforma", name: "platform", type: "text" }, // Cambiado a "platform"
     { label: "Link de Postulación", name: "applicationLink", type: "url" },
     { label: "Nombre del Reclutador", name: "recruiterName", type: "text" },
     { label: "Rubro de la Empresa", name: "industry", type: "text" },
@@ -91,6 +94,8 @@ const ApplicationForm = ({ toggleView }: { toggleView: () => void}) => {
       if (currentIndex === inputFields.length - 1) {
         console.log("Form data:", applicationData);
         await saveApplication(applicationData as IApplication)
+        setApplicationData(initialApplicationState)
+        setCurrentIndex(0)
       } else {
         handleNext(); // Avanzar al siguiente campo
       }
@@ -127,7 +132,7 @@ const ApplicationForm = ({ toggleView }: { toggleView: () => void}) => {
           {currentIndex > 0 && (
             <button type="button" onClick={handlePrev} className="bg-gray-500 text-white px-4 py-2 rounded absolute bottom-0 left-0">Anterior</button>
           )}
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded absolute bottom-0 right-0">
+          <button type="submit" className="bg-purple-900 text-white px-4 py-2 rounded absolute bottom-0 right-0">
             {currentIndex === inputFields.length - 1 ? "Guardar" : "Siguiente"}
           </button>
         </div>

@@ -14,7 +14,7 @@ import { motion } from "framer-motion";
 import React from "react";
 
 const FollowView = ({ toggleView }: { toggleView: () => void}) => {
-  const { user } = useUserContext();
+  const { user, downloadData } = useUserContext();
   const appsAmount: number = user?.applications.length as number;
   const [page, setPage] = React.useState(1);
   const rowsPerPage = 4;
@@ -49,6 +49,7 @@ const FollowView = ({ toggleView }: { toggleView: () => void}) => {
   // Definimos las columnas de la tabla
   const columns = [
     { key: "id", label: "ID" },
+    { key: "company", label: "company"},
     { key: "actions", label: "Actions" },
     { key: "applicationDate", label: "Application Date" },
     { key: "applicationLink", label: "Application Link" },
@@ -58,11 +59,20 @@ const FollowView = ({ toggleView }: { toggleView: () => void}) => {
     { key: "secondInterview", label: "2nd Interview" },
     { key: "thirdInterview", label: "3rd Interview" },
     { key: "extraInterview", label: "Extra Interview" },
+    { key: "platform", label: "Platform"},
     { key: "phoneScreen", label: "Phone Screen" },
     { key: "industry", label: "Industry" },
     { key: "recruiterName", label: "Recruiter" },
     { key: "status", label: "Status" },
   ];
+
+  const downloadHandler = async () => {
+    try {
+      await downloadData()
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const classNames = React.useMemo(
     () => ({
@@ -80,7 +90,7 @@ const FollowView = ({ toggleView }: { toggleView: () => void}) => {
         <TableHeader columns={columns}>
           {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
         </TableHeader>
-        <TableBody items={items}>
+        <TableBody emptyContent={"Ningún seguimiento para mostrar"} items={items}>
           {(item) => (
             <TableRow key={item.id}>
               {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
@@ -90,8 +100,8 @@ const FollowView = ({ toggleView }: { toggleView: () => void}) => {
       </Table>
 
     </motion.div>
-    <div className="flex justify-center items-center m-5 relative">
-          <button type="button" className="bg-blue-500 text-white px-4 py-2 rounded absolute bottom-0 left-0">Descargar</button>
+      <div className="flex justify-center items-center m-5 relative">
+        <button type="button" onClick={downloadHandler} className="bg-teal-700 text-white px-4 py-2 rounded absolute bottom-0 left-0">Descargar</button>
           <Pagination
             isCompact
             showControls
@@ -101,8 +111,8 @@ const FollowView = ({ toggleView }: { toggleView: () => void}) => {
             total={pages}
             onChange={(page) => setPage(page)}
           />
-          <button onClick={toggleView} type="button" className="bg-blue-500 text-white px-4 py-2 rounded absolute bottom-0 right-0">Subir</button>
-        </div>
+        <button onClick={toggleView} type="button" className="bg-purple-900 text-white px-4 py-2 rounded absolute bottom-0 right-0">Subir</button>
+      </div>
     </>
   );
 };
