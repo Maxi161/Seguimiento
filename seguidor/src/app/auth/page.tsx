@@ -6,7 +6,7 @@ import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
 
-const Auth = () => {
+export default function Auth() {
  // Estado para alternar entre el formulario de login y registro
  const [showLogin, setShowLogin] = useState(true);
 
@@ -27,5 +27,3 @@ const Auth = () => {
    </div>
  );
 }
-
-export default Auth

@@ -10,7 +10,7 @@ import UserList from "@/ui/user/UserList";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export const Home = () => {
+export default function Home() {
   
   const [formAppVisible, setFormAppVisible] = useState(false);
   const router = useRouter()
@@ -49,4 +49,3 @@ export const Home = () => {
     </div>
   );
 }
-export default Home

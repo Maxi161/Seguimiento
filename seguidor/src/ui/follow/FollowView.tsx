@@ -51,6 +51,7 @@ const FollowView = ({ toggleView }: { toggleView: () => void}) => {
     { key: "id", label: "ID" },
     { key: "company", label: "company"},
     { key: "actions", label: "Actions" },
+    { key: "position", label: "Position"},
     { key: "applicationDate", label: "Application Date" },
     { key: "applicationLink", label: "Application Link" },
     { key: "comments", label: "Comments" },
@@ -78,7 +79,7 @@ const FollowView = ({ toggleView }: { toggleView: () => void}) => {
     () => ({
       wrapper: ["max-h-[382px]", "max-w-3xl"],
       th: ["bg-transparent", "text-default-500", "border-b", "border-divider"],
-      td: ["text-nowrap"],
+      td: ["text-nowrap", "max-w-[320px]", "truncate"],
     }),
     [],
   );
