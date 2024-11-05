@@ -43,7 +43,7 @@ export default function Home() {
         <section>
           <InfoProject />
         </section>
-        <UserList users={users}/>
+        <UserList users={users || []}/>
       </main>
       <Footer />
     </div>
