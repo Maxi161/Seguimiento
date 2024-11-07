@@ -1,4 +1,3 @@
-import { Controller } from '@nestjs/common';
 import {
   SubscribeMessage,
   WebSocketGateway,
@@ -8,8 +7,7 @@ import { Server, Socket } from 'socket.io';
 import { SendMessageDto } from './message.dto';
 import { MessageService } from './messages.service';
 
-@WebSocketGateway('message', { cors: true })
-@Controller('message')
+@WebSocketGateway({ namespace: 'message', cors: true })
 export class MessageController {
   constructor(private readonly messService: MessageService) {}
 
