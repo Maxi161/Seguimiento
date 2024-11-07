@@ -8,7 +8,7 @@ import { Server, Socket } from 'socket.io';
 import { SendMessageDto } from './message.dto';
 import { MessageService } from './messages.service';
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway('message', { cors: true })
 @Controller('message')
 export class MessageController {
   constructor(private readonly messService: MessageService) {}

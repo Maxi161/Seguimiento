@@ -32,16 +32,27 @@ export class User {
   })
   applications: Application[];
 
-  @OneToMany(() => Message, (message) => message.sender)
+  @OneToMany(() => Message, (message) => message.sender, {
+    cascade: true,
+    eager: true,
+  })
   sentMessages: Message[];
 
-  @OneToMany(() => Message, (message) => message.receiver)
+  @OneToMany(() => Message, (message) => message.receiver, {
+    cascade: true,
+    eager: true,
+  })
   receivedMessages: Message[];
 
-  @OneToMany(() => Connection, (connection) => connection.userA)
+  @OneToMany(() => Connection, (connection) => connection.userA, {
+    cascade: true,
+    eager: true,
+  })
   sentConnections: Connection[];
 
-  // Conexiones recibidas por este usuario
-  @OneToMany(() => Connection, (connection) => connection.userB)
+  @OneToMany(() => Connection, (connection) => connection.userB, {
+    cascade: true,
+    eager: true,
+  })
   receivedConnections: Connection[];
 }

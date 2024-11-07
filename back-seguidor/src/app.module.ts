@@ -4,9 +4,9 @@ import { AppService } from './app.service';
 import { DataModule } from './modules/data/data.module';
 import { DatabaseModule } from './modules/database/database.module';
 import { UserModule } from './modules/users/users.module';
-import { MessageModule } from './modules/messages/mesaeges.module';
 import { ApplicationModule } from './modules/application/application.module';
 import { ConnectionModule } from './modules/connections/connection.module';
+import { MessageModule } from './modules/messages/messages.module';
 
 @Module({
   imports: [
