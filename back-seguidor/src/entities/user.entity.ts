@@ -44,15 +44,9 @@ export class User {
   })
   receivedMessages: Message[];
 
-  @OneToMany(() => Connection, (connection) => connection.userA, {
-    // Eliminar cascade aquí
-    eager: true,
-  })
+  @OneToMany(() => Connection, (connection) => connection.userA)
   sentConnections: Connection[];
 
-  @OneToMany(() => Connection, (connection) => connection.userB, {
-    // Eliminar cascade aquí
-    eager: true,
-  })
+  @OneToMany(() => Connection, (connection) => connection.userB)
   receivedConnections: Connection[];
 }
