@@ -45,13 +45,13 @@ export class User {
   receivedMessages: Message[];
 
   @OneToMany(() => Connection, (connection) => connection.userA, {
-    cascade: true,
+    // Eliminar cascade aquí
     eager: true,
   })
   sentConnections: Connection[];
 
   @OneToMany(() => Connection, (connection) => connection.userB, {
-    cascade: true,
+    // Eliminar cascade aquí
     eager: true,
   })
   receivedConnections: Connection[];
