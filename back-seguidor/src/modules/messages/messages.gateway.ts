@@ -1,5 +1,6 @@
-import { Controller } from '@nestjs/common';
 import {
+  ConnectedSocket,
+  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -8,6 +9,7 @@ import { Server, Socket } from 'socket.io';
 import { SendMessageDto } from './message.dto';
 import { MessageService } from './messages.service';
 
+// @Controller('message')
 @WebSocketGateway({
   namespace: 'message',
   cors: {
@@ -15,8 +17,7 @@ import { MessageService } from './messages.service';
     credentials: true,
   },
 })
-@Controller('message')
-export class MessageController {
+export class MessageGateway {
   constructor(private readonly messService: MessageService) {}
 
   @WebSocketServer()
@@ -24,23 +25,29 @@ export class MessageController {
 
   private connectedUsers = new Map<string, string>();
 
-  handleConnection(client: Socket) {
+  handleConnection(@ConnectedSocket() client: Socket) {
     console.log(`Client connected: ${client.id}`);
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect(@ConnectedSocket() client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
     this.connectedUsers.delete(client.id);
   }
 
   @SubscribeMessage('join-chat')
-  handleJoinChat(client: Socket, userId: string) {
+  handleJoinChat(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() userId: string,
+  ) {
     this.connectedUsers.set(userId, client.id);
     client.join(userId);
   }
 
   @SubscribeMessage('send-message')
-  async handleSendMessage(client: Socket, data: SendMessageDto) {
+  async handleSendMessage(
+    @MessageBody() data: SendMessageDto,
+    @ConnectedSocket() client: Socket,
+  ) {
     const { sender, receiver, content } = data;
 
     // Guardar el mensaje en la base de datos

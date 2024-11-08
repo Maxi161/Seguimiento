@@ -2,7 +2,7 @@ import { IUser } from "@/interfaces/user.interfaces";
 import { Input, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, User } from "@nextui-org/react";
 import { useMemo, useState } from "react";
 
-const UserList = ({users}: {users: IUser[]}) => {
+const UserList = ({users, header}: {users: IUser[]; header: boolean}) => {
 
   const [inputValue, setInputValue] = useState("")
 
@@ -46,10 +46,10 @@ const UserList = ({users}: {users: IUser[]}) => {
   );
 
   return (
-    <section className="w-8/12 h-auto flex justify-center items-center m-12">
+    <section className="w-8/12 h-auto flex justify-center flex-col items-center m-12">
       <Input value={inputValue} onChange={handleChange}/>
     
-      <Table removeWrapper aria-label="Usuarios" classNames={classNames}>
+      <Table hideHeader={!header} removeWrapper aria-label="Usuarios" classNames={classNames}>
         <TableHeader columns={columns}>
           {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
         </TableHeader>

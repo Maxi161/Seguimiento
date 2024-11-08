@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useUserContext } from "@/context/user.context";
 import { IUser } from "@/interfaces/user.interfaces";
 import FollowView from "@/ui/follow/FollowView";
@@ -11,11 +11,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  
   const [formAppVisible, setFormAppVisible] = useState(false);
-  const router = useRouter()
-  const {getUsers, loading, isLogged} = useUserContext()
-  const [users, setUsers] = useState<IUser[]>([])
+  const [users, setUsers] = useState<IUser[]>([]);
+  const [hasFetchedUsers, setHasFetchedUsers] = useState(false); // Estado para asegurarse de que getUsers se ejecute solo una vez
+  const router = useRouter();
+  const { getUsers, loading, isLogged } = useUserContext();
+
   const toggleView = () => {
     setFormAppVisible((prevShowLogin) => !prevShowLogin);
   };
@@ -24,12 +25,20 @@ export default function Home() {
     if (!loading && !isLogged) {
       router.push("/auth");
     }
-    const saveUsers = async () => {
-      setUsers(await getUsers());
-    }
+  }, [isLogged, loading, router]);
 
-    saveUsers()
-  }, [isLogged, loading, router, getUsers]);
+  useEffect(() => {
+    // Solo ejecutamos la función de getUsers si no se ha hecho antes
+    if (!hasFetchedUsers && !loading && isLogged) {
+      const saveUsers = async () => {
+        const usersList = await getUsers();
+        setUsers(usersList);
+        setHasFetchedUsers(true); // Marca que ya se cargaron los usuarios
+      };
+
+      saveUsers();
+    }
+  }, [getUsers, isLogged, loading, hasFetchedUsers]);
 
   if (loading) return <div>Loading...</div>;
 
@@ -38,12 +47,16 @@ export default function Home() {
       <Header />
       <main className="flex justify-center items-center flex-col">
         <section className="w-10/12 m-8 relative">
-        {formAppVisible ? <ApplicationForm toggleView={toggleView}/> : <FollowView toggleView={toggleView} />}
+          {formAppVisible ? (
+            <ApplicationForm toggleView={toggleView} />
+          ) : (
+            <FollowView toggleView={toggleView} />
+          )}
         </section>
         <section>
           <InfoProject />
         </section>
-        <UserList users={users}/>
+        <UserList users={users} header={true} />
       </main>
       <Footer />
     </div>

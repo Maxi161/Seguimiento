@@ -1,5 +1,4 @@
 import { Box, Button, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import { Divider } from "@nextui-org/react";
 import { useState } from "react";
 
 const items = [
@@ -14,6 +13,20 @@ const items = [
           strokeLinejoin="round"
           strokeWidth="2"
           d="M12 11v.01M8 11v.01m8-.01v.01M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-5l-5 3v-3H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"
+        />
+      </svg>
+    ),
+  },
+
+  {
+    text: "Agregar Usuarios",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+        <path
+        fill="#ffffff"
+        fillRule="evenodd"
+        d="M9 4a4 4 0 1 0 0 8a4 4 0 0 0 0-8m-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1"
+        clipRule="evenodd"
         />
       </svg>
     ),
@@ -35,16 +48,6 @@ const MenuDrawer = () => {
             <ListItemButton>
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Divider />
-      <List>
-        {["All mail", "Trash", "Spam"].map((text, index) => (
-          <ListItem key={index} disablePadding>
-            <ListItemButton>
-              <ListItemText primary={text} />
             </ListItemButton>
           </ListItem>
         ))}
