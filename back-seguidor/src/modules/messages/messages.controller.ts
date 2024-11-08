@@ -11,7 +11,7 @@ import { MessageService } from './messages.service';
 @WebSocketGateway({
   namespace: 'message',
   cors: {
-    origin: 'http://localhost:3000', // O tu URL de producción
+    origin: '*', // O tu URL de producción
     credentials: true,
   },
 })
