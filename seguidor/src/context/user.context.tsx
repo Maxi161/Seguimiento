@@ -8,6 +8,7 @@ export const UserContext = createContext<UserContextType>({
   loading: false,
   onProcess: false,
   connections: [],
+  conversations: [],
   login: async () => false,
   register: async () => false,
   logout: () => {},
@@ -17,6 +18,7 @@ export const UserContext = createContext<UserContextType>({
   sendConnection: async () => {},
   changeConnection: async () => {},
   getConnections: async () => {},
+  sendMessage: async () => {},
 });
 
 export const useUserContext = () => useContext(UserContext);

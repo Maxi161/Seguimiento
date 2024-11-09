@@ -38,7 +38,7 @@ export class MessageService {
         content: content,
       };
 
-      await this.messRepo.save(message);
+      return await this.messRepo.save(message);
     } catch (error) {
       throw new HttpException(
         { status: 500, error: `Could not save message: ${error}` },
@@ -71,6 +71,6 @@ export class MessageService {
       order: { sentAt: 'ASC' },
     });
 
-    return messages;
+    return { messages: messages, participants: [userSender, userReceiver] };
   }
 }

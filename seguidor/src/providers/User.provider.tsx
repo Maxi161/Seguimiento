@@ -2,7 +2,7 @@
 
 import { UserContext } from "@/context/user.context";
 import { IApplication } from "@/interfaces/seguimiento.interface";
-import { IConnection, IUser } from "@/interfaces/user.interfaces";
+import { IConnection, IConversation, IMessage, IUser } from "@/interfaces/user.interfaces";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -23,7 +23,45 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);  // Indicando carga de datos inicial
   const [onProcess, setOnProcess] = useState(false);  // Indicando procesos en curso
   const [connections, setConnections] = useState<IConnection[]>([]);
+  const [conversations, setConversations] = useState<IConversation[]>([])
   const router = useRouter();
+
+
+
+  const updateConversations = (message: IMessage) => {
+    setConversations((prevConversations) => {
+      // Buscar si ya existe una conversación entre los participantes
+      const existingConversation = prevConversations.find(
+        (conv) =>
+          (conv?.participants[0]?.id === message.sender.id && conv?.participants[1]?.id === message.receiver.id) ||
+          (conv?.participants[0]?.id === message.receiver.id && conv?.participants[1]?.id === message.sender.id)
+      );
+  
+      if (existingConversation) {
+        // Si existe, agregar el mensaje a la conversación
+        return prevConversations.map((conv) =>
+          conv === existingConversation
+            ? {
+                ...conv,
+                messages: [...conv.messages, message] // Aquí usas el mensaje completo
+              }
+            : conv
+        );
+      } else {
+        // Si no existe, crear una nueva conversación con los participantes y el mensaje
+        return [
+          ...prevConversations,
+          {
+            participants: [message.sender, message.receiver],
+            messages: [message] // Aquí usas el mensaje completo
+          }
+        ];
+      }
+    });
+  };
+  
+
+
 
   // Función para manejar la conexión de WebSocket
   const initializeWebSocket = (userId: string) => {
@@ -32,9 +70,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("Conexión WebSocket iniciada");
 
       // Escuchar mensajes entrantes
-      socket.on('receive-message', (message: { sender: string; content: string }) => {
+      socket.on('receive-message', (message: { sender: IUser; content: string, receiver: IUser, id: string, sentAt: Date }) => {
         console.log('Nuevo mensaje:', message);
-        // Aquí puedes manejar el mensaje recibido
+        updateConversations(message);
       });
     }
   };
@@ -47,7 +85,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const mapConnectionsToFriends = async (user: IUser): Promise<IUser[]> => {
-    const res = await axios.get(`${rutaApi}/connections`);
+    const res = await axios.get(`${rutaApi}/connections/${user.id}`);
     const userConnections: IConnection[] = res.data;
     const friendsAccepted = userConnections.filter(
       (conn: IConnection) => conn.status === "accepted"
@@ -65,6 +103,18 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   };
+
+
+  const sendMessage = async (data: Partial<IMessage>) => {
+    try {
+      setOnProcess(true)
+      socket.emit("send-message", {receiver: data.receiver, sender: data.sender, content: data.content})
+      setOnProcess(false)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+  
 
   // Login logic
   const login = async (credentials: { email: string; password: string }) => {
@@ -220,10 +270,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (user) {
       initializeWebSocket(user.id);
+
       return () => {
         closeWebSocketConnection(user.id);
       };
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (
@@ -234,6 +286,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         onProcess,
         connections,
+        conversations,
         login,
         register,
         logout,
@@ -243,6 +296,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sendConnection,
         changeConnection,
         getConnections,
+        sendMessage,
+        
       }}
     >
       {children}

@@ -9,11 +9,16 @@ export interface IConnection {
 }
 
 export interface IMessage {
-  id: string;
+  id?: string;
   content: string;
   sentAt: Date;
   sender: IUser;
   receiver: IUser;
+}
+
+export interface IConversation {
+  participants: IUser[] | Partial<IUser[]>;
+  messages: IMessage[];
 }
 
 export interface IUser {
@@ -33,6 +38,7 @@ export interface UserContextType {
   loading: boolean;
   onProcess: boolean;
   connections: IConnection[];
+  conversations: IConversation[];
   login: (credentials: { email: string; password: string }) => Promise<boolean>;
   register: (newUser: {
     name: string;
@@ -47,4 +53,5 @@ export interface UserContextType {
   sendConnection: (userA: string, userB: string) => Promise<void>;
   changeConnection: (id: string, action: "accept" | "block") => Promise<void>;
   getConnections: (id: string) => Promise<void>;
+  sendMessage: (data: Partial<IMessage>) => Promise<void>;
 }
