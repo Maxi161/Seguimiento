@@ -1,15 +1,36 @@
+"use client";
+
+import React, { useEffect, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
+import { useUserContext } from '@/context/user.context';
 
 interface ButtonConnectionProps {
-  handlerClick: () => void;
-  isChecked: boolean;
+  userId: string;
 }
 
-const ButtonConnection: React.FC<ButtonConnectionProps> = ({ handlerClick, isChecked }) => {
+const ButtonConnection: React.FC<ButtonConnectionProps> = ({ userId }) => {
+  const { user, sendConnection} = useUserContext()
+  
+
+  // Estado interno para manejar si está marcado o no
+  const [isChecked, setIsChecked] = useState(false);
+
+  useEffect(() => {
+    console.log(`Botón del usuario: ${userId}`)
+  })
+  // Función para manejar el clic
+  const handleClick = () => {
+    setIsChecked(true); // Alternar el estado entre true y false
+    const sendConn = async () => {
+      await sendConnection(user?.id as string, userId)
+    }
+    sendConn();
+
+  };
+
   return (
-    <IconButton onClick={handlerClick} disabled={!isChecked} className="z-[8000]">
+    <IconButton className="z-[8000]" onClick={handleClick}>
       {isChecked ? (
-        // SVG "Check" cuando está activado
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
           <path
             fill="#ffffff"
@@ -19,7 +40,6 @@ const ButtonConnection: React.FC<ButtonConnectionProps> = ({ handlerClick, isChe
           />
         </svg>
       ) : (
-        // SVG "X" cuando no está activado
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
           <path
             fill="none"
@@ -35,4 +55,4 @@ const ButtonConnection: React.FC<ButtonConnectionProps> = ({ handlerClick, isChe
   );
 };
 
-export default ButtonConnection
+export default ButtonConnection;

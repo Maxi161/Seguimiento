@@ -1,7 +1,7 @@
-import { Box, Button, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { Box, Button, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { useState } from "react";
 
-const items = [
+const list1 = [
   {
     text: "Mensajes",
     icon: (
@@ -33,6 +33,34 @@ const items = [
   },
 ];
 
+const list2 = [
+  {
+    text: "logout",
+    icon: (
+      <svg
+       xmlns="http://www.w3.org/2000/svg" 
+       width="24" 
+       height="24" 
+       viewBox="0 0 24 24"
+       >
+        <g 
+        fill="none" 
+        stroke="#ffffff" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        strokeWidth="2">
+          <path 
+          d="M16 5v-1c0 -0.55 -0.45 -1 -1 -1h-9c-0.55 0 -1 0.45 -1 1v16c0 0.55 0.45 1 1 1h9c0.55 0 1 -0.45 1 -1v-1"/>
+          <path 
+          d="M10 12h11"/>
+          <path 
+          d="M21 12l-3.5 -3.5M21 12l-3.5 3.5"/>
+          </g>
+          </svg>
+    ),
+  },
+];
+
 const MenuDrawer = () => {
   const [open, setOpen] = useState(false);
 
@@ -43,7 +71,18 @@ const MenuDrawer = () => {
   const DrawerList = (
     <Box sx={{ width: 250, height: "100vh", background: "rgb(14, 14, 14)", color: "white" }} role="presentation" onClick={toggleDrawer(false)}>
       <List>
-        {items.map((item, index) => (
+        {list1.map((item, index) => (
+          <ListItem key={index} disablePadding>
+            <ListItemButton>
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider className="bg-purple-800"/>
+      <List>
+        {list2.map((item, index) => (
           <ListItem key={index} disablePadding>
             <ListItemButton>
               <ListItemIcon>{item.icon}</ListItemIcon>
