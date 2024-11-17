@@ -127,6 +127,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLogged(true);
       saveUserToLocalStorage(user);
       setOnProcess(false);
+      getConnections(user?.id as string)
       return true;
     } catch (error) {
       console.error(error);
@@ -140,8 +141,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     setIsLogged(false);
+    closeWebSocketConnection(user?.id as string)
     localStorage.removeItem("user");
-    router.push("/login");
+    router.push("/auth");
   };
 
   // Save application data
@@ -211,6 +213,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await axios.post(`${rutaApi}/connections/request`, { userAId, userBId });
       console.log("Solicitud enviada con éxito:", res.data);
       setOnProcess(false);
+      getConnections(user?.id as string)
     } catch (err) {
       setOnProcess(false);
       console.error("Error al enviar solicitud de conexión:", err);
@@ -218,7 +221,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Change connection status (accept or block)
-  const changeConnection = async (id: string, action: "accept" | "block") => {
+  const changeConnection = async (id: string, action: "accept" | "reject" | "block") => {
     try {
       setOnProcess(true);
       const res = await axios.patch(`${rutaApi}/connections/${id}/${action}`);
@@ -254,9 +257,22 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const conns: IConnection[] = res.data;
       setConnections(conns);
     } catch (err) {
-      console.error("Error al obtener conexiones:", err);
+      console.log("Error al obtener conexiones:", err);
     }
   };
+
+  const getPendingConnections = async (id: string) => {
+    try {
+      setOnProcess(true)
+      const res = await axios.get(`${rutaApi}/connections/${id}/pending`)
+      const data = res?.data;
+      setOnProcess(false)
+      return data
+    } catch (error) {
+      console.log(error)
+      setOnProcess(false)
+    }
+  }
 
   useEffect(() => {
     const storedUser = loadUserFromLocalStorage();
@@ -266,6 +282,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setLoading(false);
   }, []);
+
 
   useEffect(() => {
     if (user) {
@@ -297,6 +314,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         changeConnection,
         getConnections,
         sendMessage,
+        getPendingConnections
         
       }}
     >

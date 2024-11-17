@@ -1,7 +1,7 @@
 import { IApplication, IParsedApplication } from "./seguimiento.interface";
 
 export interface IConnection {
-  id?: string;
+  id: string;
   userA: IUser;
   userB: IUser;
   status: "pending" | "accepted" | "bloqued";
@@ -51,7 +51,11 @@ export interface UserContextType {
   downloadData: () => Promise<void>;
   getUsers: () => Promise<IUser[]>;
   sendConnection: (userA: string, userB: string) => Promise<void>;
-  changeConnection: (id: string, action: "accept" | "block") => Promise<void>;
+  changeConnection: (
+    id: string,
+    action: "accept" | "block" | "reject"
+  ) => Promise<void>;
   getConnections: (id: string) => Promise<void>;
   sendMessage: (data: Partial<IMessage>) => Promise<void>;
+  getPendingConnections: (id: string) => Promise<IConnection[]>;
 }

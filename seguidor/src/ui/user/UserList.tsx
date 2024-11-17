@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { IUser } from "@/interfaces/user.interfaces";
 import { Input, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, User } from "@nextui-org/react";
 import ButtonConnection from '../button/ButtonConnection';
@@ -7,7 +7,7 @@ import { useUserContext } from '@/context/user.context';
 
 const UserList = ({ users, header }: { users: IUser[]; header: boolean }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { user, sendConnection } = useUserContext();
+  const { user, getConnections } = useUserContext();
   const [inputValue, setInputValue] = useState("");
 
   // Filtrado de usuarios por el nombre
@@ -57,6 +57,17 @@ const UserList = ({ users, header }: { users: IUser[]; header: boolean }) => {
     }),
     []
   );
+
+      // Efecto para obtener conexiones solo al montar el componente
+  useEffect(() => {
+    const getConn = async () => {
+      await getConnections(user?.id as string);
+    }
+    if (user?.id) {
+      getConn()
+      console.log("se actualizó")
+    }
+  }, []);
 
   return (
     <section className="w-8/12 h-auto flex justify-center flex-col items-center m-12">

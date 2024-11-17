@@ -9,27 +9,30 @@ interface ButtonConnectionProps {
 }
 
 const ButtonConnection: React.FC<ButtonConnectionProps> = ({ userId }) => {
-  const { user, sendConnection} = useUserContext()
-  
+  const { user, sendConnection, connections, getConnections } = useUserContext();
 
   // Estado interno para manejar si está marcado o no
   const [isChecked, setIsChecked] = useState(false);
 
+
+  // Efecto para verificar si hay una conexión existente cada vez que `connections` cambia
   useEffect(() => {
-    console.log(`Botón del usuario: ${userId}`)
-  })
+    const actualConn = connections.some((conn) => conn.userB.id === userId);
+    setIsChecked(actualConn);
+  }, [connections, userId]);
+
   // Función para manejar el clic
   const handleClick = () => {
-    setIsChecked(true); // Alternar el estado entre true y false
+    setIsChecked(true); // Marcar como checked inmediatamente
     const sendConn = async () => {
-      await sendConnection(user?.id as string, userId)
-    }
+      await sendConnection(user?.id as string, userId);
+      getConnections(user?.id as string); // Refrescar las conexiones después de enviar
+    };
     sendConn();
-
   };
 
   return (
-    <IconButton className="z-[8000]" onClick={handleClick}>
+    <IconButton className="z-[8000]" onClick={handleClick} disabled={isChecked}>
       {isChecked ? (
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
           <path

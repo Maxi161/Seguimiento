@@ -16,29 +16,37 @@ export class ConnectionService {
   async sendConnectionRequest(
     userA: string,
     userB: string,
-  ): Promise<Connection> {
+  ): Promise<Partial<Connection>> {
     return this.connectionRepository.createConnection(userA, userB);
   }
 
-  async acceptConnectionRequest(connectionId: string): Promise<Connection> {
+  async acceptConnectionRequest(
+    connectionId: string,
+  ): Promise<Partial<Connection>> {
     return this.connectionRepository.updateConnectionStatus(
       connectionId,
       ConnectionStatus.ACCEPTED,
     );
   }
 
-  async blockConnection(connectionID: string): Promise<Connection> {
+  async blockConnection(connectionID: string): Promise<Partial<Connection>> {
     return this.connectionRepository.updateConnectionStatus(
       connectionID,
       ConnectionStatus.BLOCKED,
     );
   }
+  async rejectConnetion(connectionID: string): Promise<Partial<Connection>> {
+    return this.connectionRepository.updateConnectionStatus(
+      connectionID,
+      ConnectionStatus.REJECT,
+    );
+  }
 
-  async getUserConnections(userId: string): Promise<Connection[]> {
+  async getUserConnections(userId: string): Promise<Partial<Connection>[]> {
     return this.connectionRepository.findConnectionsByUserId(userId);
   }
 
-  async getPendingConnections(userId: string): Promise<Connection[]> {
+  async getPendingConnections(userId: string): Promise<Partial<Connection>[]> {
     return this.connectionRepository.findPendingConnections(userId);
   }
 }
