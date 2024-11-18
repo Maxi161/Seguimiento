@@ -24,6 +24,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [onProcess, setOnProcess] = useState(false);  // Indicando procesos en curso
   const [connections, setConnections] = useState<IConnection[]>([]);
   const [conversations, setConversations] = useState<IConversation[]>([])
+  const [webSocketStatus, setWebSocketStatus] = useState(false)
   const router = useRouter();
 
 
@@ -65,15 +66,24 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Función para manejar la conexión de WebSocket
   const initializeWebSocket = (userId: string) => {
-    if (userId) {
+    if (userId && !webSocketStatus) {
+      setWebSocketStatus(true)
       socket.emit('join-chat', userId);
       console.log("Conexión WebSocket iniciada");
-
       // Escuchar mensajes entrantes
       socket.on('receive-message', (message: { sender: IUser; content: string, receiver: IUser, id: string, sentAt: Date }) => {
         console.log('Nuevo mensaje:', message);
         updateConversations(message);
       });
+
+      socket.on("get-conversation-response", (data: IConversation) => {
+        console.log("tula:")
+        console.log(data)
+        data.messages.map((message) => {
+          updateConversations(message)
+        })
+        console.log("convesación actulizada")
+      })
     }
   };
 
@@ -260,6 +270,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("Error al obtener conexiones:", err);
     }
   };
+  
+
+  const getMessagesWith = async (userAID: string, userBID: string ) => {
+    socket.emit("get-messages", {userAID, userBID})
+  }
+
+
 
   const getPendingConnections = async (id: string) => {
     try {
@@ -273,6 +290,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setOnProcess(false)
     }
   }
+
 
   useEffect(() => {
     const storedUser = loadUserFromLocalStorage();
@@ -314,8 +332,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         changeConnection,
         getConnections,
         sendMessage,
-        getPendingConnections
-        
+        getPendingConnections,
+        getMessagesWith
       }}
     >
       {children}

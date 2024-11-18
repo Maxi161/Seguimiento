@@ -1,8 +1,8 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsNotEmpty,
   IsString,
-  IsUUID,
   MaxLength,
   MinLength,
   ValidateNested,
@@ -11,11 +11,11 @@ import { Message } from 'src/entities/message.entity';
 import { User } from 'src/entities/user.entity';
 
 export class SendMessageDto {
-  @IsUUID('4')
-  sender: string;
+  @IsNotEmpty()
+  sender: Partial<User>;
 
-  @IsUUID('4')
-  receiver: string;
+  @IsNotEmpty()
+  receiver: Partial<User>;
 
   @IsString()
   @MinLength(1, { message: 'Content must not be empty' })

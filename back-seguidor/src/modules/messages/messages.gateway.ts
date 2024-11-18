@@ -39,8 +39,11 @@ export class MessageGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() userId: string,
   ) {
-    this.connectedUsers.set(userId, client.id);
-    client.join(userId);
+    if (!this.connectedUsers.has(userId)) {
+      console.log('un cliente ha entrado al chat ', userId);
+      this.connectedUsers.set(userId, client.id);
+      client.join(userId);
+    }
   }
 
   @SubscribeMessage('send-message')
@@ -57,13 +60,13 @@ export class MessageGateway {
       content,
       sender,
     );
-
-    const receiverSocketId = this.connectedUsers.get(receiver);
+    const receiverSocketId = this.connectedUsers.get(receiver.id);
     if (receiverSocketId) {
       this.server
         .to([receiverSocketId, client.id])
         .emit('receive-message', message);
     } else {
+      console.log(receiver);
       console.log(`User ${receiver} not connected`);
     }
   }
@@ -91,6 +94,8 @@ export class MessageGateway {
 
       // Emitir al cliente que solicitó la conversación completa
       client.emit('get-conversation-response', conversation);
+      console.log(conversation);
+      console.log(data);
     } catch (err) {
       console.log(`Error getting messages: ${err}`);
       client.emit('get-conversation-response', {

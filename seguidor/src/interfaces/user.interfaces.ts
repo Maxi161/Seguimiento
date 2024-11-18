@@ -58,4 +58,5 @@ export interface UserContextType {
   getConnections: (id: string) => Promise<void>;
   sendMessage: (data: Partial<IMessage>) => Promise<void>;
   getPendingConnections: (id: string) => Promise<IConnection[]>;
+  getMessagesWith: (userAID: string, userBID: string) => Promise<void>;
 }
