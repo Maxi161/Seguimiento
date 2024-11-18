@@ -6,6 +6,7 @@ import Footer from "@/ui/footer/Footer";
 import ApplicationForm from "@/ui/form/FormSeguimiento";
 import Header from "@/ui/header/Header";
 import InfoProject from "@/ui/info/Info.";
+import Loader from "@/ui/loader/Loader";
 import UserList from "@/ui/user/UserList";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -40,7 +41,7 @@ export default function Home() {
     }
   }, [getUsers, isLogged, loading, hasFetchedUsers]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loader />;
 
   return (
     <div className="relative h-full w-full z-10 min-h-screen">

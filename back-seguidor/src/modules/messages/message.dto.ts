@@ -1,14 +1,36 @@
-import { IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
+import { Message } from 'src/entities/message.entity';
+import { User } from 'src/entities/user.entity';
 
 export class SendMessageDto {
-  @IsUUID('4')
-  sender: string;
+  @IsNotEmpty()
+  sender: Partial<User>;
 
-  @IsUUID('4')
-  receiver: string;
+  @IsNotEmpty()
+  receiver: Partial<User>;
 
   @IsString()
   @MinLength(1, { message: 'Content must not be empty' })
   @MaxLength(500, { message: 'Content must be 500 characters or less' })
   content: string;
+}
+
+export class ConversationDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => User)
+  participants: User[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => Message)
+  messages: Message[];
 }

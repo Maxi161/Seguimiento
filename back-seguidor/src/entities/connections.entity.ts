@@ -12,6 +12,7 @@ export enum ConnectionStatus {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
   BLOCKED = 'blocked',
+  REJECT = 'rejected',
 }
 
 @Entity('connections')
@@ -25,7 +26,7 @@ export class Connection {
     eager: true,
   })
   @JoinColumn({ name: 'userAId' })
-  userA: User;
+  userA: User | Partial<User>;
 
   // Usuario que recibe la conexión
   @ManyToOne(() => User, (user) => user.receivedConnections, {
@@ -33,7 +34,7 @@ export class Connection {
     eager: true,
   })
   @JoinColumn({ name: 'userBId' })
-  userB: User;
+  userB: User | Partial<User>;
 
   // Estado de la conexión (pendiente, aceptada, bloqueada, etc.)
   @Column({

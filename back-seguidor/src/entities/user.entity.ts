@@ -28,19 +28,16 @@ export class User {
 
   @OneToMany(() => Application, (application) => application.user, {
     cascade: true,
-    eager: true,
   })
   applications: Application[];
 
   @OneToMany(() => Message, (message) => message.sender, {
     cascade: true,
-    eager: true,
   })
   sentMessages: Message[];
 
   @OneToMany(() => Message, (message) => message.receiver, {
     cascade: true,
-    eager: true,
   })
   receivedMessages: Message[];
 

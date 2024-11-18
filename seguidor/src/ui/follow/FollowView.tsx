@@ -70,10 +70,10 @@ const FollowView = ({ toggleView }: { toggleView: () => void}) => {
             {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
           </TableHeader>
           <TableBody emptyContent="Ningún seguimiento para mostrar">
-            {items.map((item) => (
-              <TableRow key={item.id}>
+            {items.map((item, index) => (
+              <TableRow key={`${item.id}-${index}`}>
                 {columns.map((column) => (
-                  <TableCell key={column.key}>{getKeyValue(item, column.key)}</TableCell>
+                  <TableCell key={`${column.key}-${index}`}>{getKeyValue(item, column.key)}</TableCell>
                 ))}
               </TableRow>
             ))}
