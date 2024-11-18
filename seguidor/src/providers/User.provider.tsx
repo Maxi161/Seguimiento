@@ -9,7 +9,9 @@ import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
 const rutaApi = "https://seguimiento-13h8.onrender.com";
+
 // const rutaApi = "http://localhost:3005"
+
 const socket = io(`${rutaApi}/message`, {
   reconnectionAttempts: 5,
   reconnectionDelay: 1000, // 1 segundo
