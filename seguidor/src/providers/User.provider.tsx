@@ -8,8 +8,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-// const rutaApi = "https://seguimiento-13h8.onrender.com";
-const rutaApi = "http://localhost:3005"
+const rutaApi = "https://seguimiento-13h8.onrender.com";
+// const rutaApi = "http://localhost:3005"
 const socket = io(`${rutaApi}/message`, {
   reconnectionAttempts: 5,
   reconnectionDelay: 1000, // 1 segundo
@@ -31,11 +31,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateConversations = (message: IMessage) => {
     setConversations((prevConversations) => {
+      const { sender, receiver } = message;
       // Buscar si ya existe una conversación entre los participantes
-      const existingConversation = prevConversations.find(
-        (conv) =>
-          (conv?.participants[0]?.id === message.sender.id && conv?.participants[1]?.id === message.receiver.id) ||
-          (conv?.participants[0]?.id === message.receiver.id && conv?.participants[1]?.id === message.sender.id)
+      const existingConversation = prevConversations.find((conv) =>
+        conv?.participants.some((participant) => participant?.id === sender.id) &&
+        conv?.participants.some((participant) => participant?.id === receiver.id)
       );
   
       if (existingConversation) {
@@ -44,7 +44,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           conv === existingConversation
             ? {
                 ...conv,
-                messages: [...conv.messages, message] // Aquí usas el mensaje completo
+                messages: [...conv.messages, message]
               }
             : conv
         );
@@ -53,13 +53,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return [
           ...prevConversations,
           {
-            participants: [message.sender, message.receiver],
-            messages: [message] // Aquí usas el mensaje completo
+            participants: [sender, receiver],
+            messages: [message]
           }
         ];
       }
     });
   };
+  
   
 
 
@@ -72,13 +73,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("Conexión WebSocket iniciada");
       // Escuchar mensajes entrantes
       socket.on('receive-message', (message: { sender: IUser; content: string, receiver: IUser, id: string, sentAt: Date }) => {
-        console.log('Nuevo mensaje:', message);
-        updateConversations(message);
+        if (message.sender && message.receiver) {
+          updateConversations(message);
+        } else {
+          console.log("El mensaje recibido no tiene un sender o receiver válido", message);
+        }
       });
 
       socket.on("get-conversation-response", (data: IConversation) => {
-        console.log("tula:")
-        console.log(data)
         data.messages.map((message) => {
           updateConversations(message)
         })
@@ -117,13 +119,25 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendMessage = async (data: Partial<IMessage>) => {
     try {
-      setOnProcess(true)
-      socket.emit("send-message", {receiver: data.receiver, sender: data.sender, content: data.content})
-      setOnProcess(false)
+      if (!data.sender || !data.receiver) {
+        console.error("El mensaje necesita un sender y un receiver válido.", data);
+        return;
+      }
+      
+      setOnProcess(true);
+      // Emite el mensaje usando las propiedades correctas
+      socket.emit("send-message", {
+        receiver: data.receiver,
+        sender: data.sender,
+        content: data.content
+      });
+      setOnProcess(false);
     } catch (err) {
-      console.log(err)
+      console.log(err);
+      setOnProcess(false);
     }
-  }
+  };
+  
   
 
   // Login logic
@@ -220,8 +234,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const sendConnection = async (userAId: string, userBId: string) => {
     try {
       setOnProcess(true);
-      const res = await axios.post(`${rutaApi}/connections/request`, { userAId, userBId });
-      console.log("Solicitud enviada con éxito:", res.data);
+      await axios.post(`${rutaApi}/connections/request`, { userAId, userBId });
       setOnProcess(false);
       getConnections(user?.id as string)
     } catch (err) {
@@ -286,8 +299,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setOnProcess(false)
       return data
     } catch (error) {
-      console.log(error)
       setOnProcess(false)
+      console.log("error al obtener las conexiones pendientes: ", error)
     }
   }
 
