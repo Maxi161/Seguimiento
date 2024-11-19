@@ -66,7 +66,6 @@ export class MessageGateway {
         .to([receiverSocketId, client.id])
         .emit('receive-message', message);
     } else {
-      console.log(receiver);
       console.log(`User ${receiver} not connected`);
     }
   }
@@ -94,8 +93,6 @@ export class MessageGateway {
 
       // Emitir al cliente que solicitó la conversación completa
       client.emit('get-conversation-response', conversation);
-      console.log(conversation);
-      console.log(data);
     } catch (err) {
       console.log(`Error getting messages: ${err}`);
       client.emit('get-conversation-response', {

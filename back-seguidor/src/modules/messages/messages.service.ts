@@ -58,11 +58,11 @@ export class MessageService {
   async getAllMessagesWith(sender: string, receiver: string) {
     const userSender = await this.userRepo.findOne({
       where: { id: sender },
-      select: ['email', 'name', 'id', 'role'],
+      select: ['email', 'name', 'id', 'role'], // Asegurándote de no seleccionar la contraseña.
     });
     const userReceiver = await this.userRepo.findOne({
       where: { id: receiver },
-      select: ['email', 'name', 'id', 'role'],
+      select: ['email', 'name', 'id', 'role'], // Asegurándote de no seleccionar la contraseña.
     });
 
     if (!userSender) {
@@ -85,21 +85,39 @@ export class MessageService {
       relations: ['receiver', 'sender'],
     });
 
-    messages.map((msg) => {
-      if (msg.receiver.name === userReceiver.name) {
-        msg.receiver = userReceiver;
-        msg.sender = userSender;
-      }
-      msg.receiver = userSender;
-      msg.sender = userReceiver;
-    });
-
-    console.log(sender, receiver);
-    console.log(messages);
+    // Filtrar datos sensibles antes de enviar al cliente
+    const filteredMessages: Partial<Message[]> = messages.map((msg) => ({
+      ...msg,
+      sender: {
+        id: msg.sender.id,
+        name: msg.sender.name,
+        email: msg.sender.email,
+        role: msg.sender.role,
+      },
+      receiver: {
+        id: msg.receiver.id,
+        name: msg.receiver.name,
+        email: msg.receiver.email,
+        role: msg.receiver.role,
+      },
+    }));
 
     return {
-      messages: messages,
-      participants: [userSender, userReceiver],
+      messages: filteredMessages,
+      participants: [
+        {
+          id: userSender.id,
+          name: userSender.name,
+          email: userSender.email,
+          role: userSender.role,
+        },
+        {
+          id: userReceiver.id,
+          name: userReceiver.name,
+          email: userReceiver.email,
+          role: userReceiver.role,
+        },
+      ],
     };
   }
 }

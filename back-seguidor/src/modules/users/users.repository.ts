@@ -28,7 +28,7 @@ export class UserRepository {
       throw new HttpException(
         {
           status: 400,
-          error: 'email is already in use',
+          error: 'user not found',
         },
         400,
       );
@@ -63,6 +63,7 @@ export class UserRepository {
     const newUserData = await this.userRepo.findOne({
       where: { email: newUser.email },
       select: ['receivedMessages', 'applications', 'name', 'id', 'email'],
+      relations: ['applications'],
     });
 
     return newUserData;
@@ -83,15 +84,8 @@ export class UserRepository {
 
     const userData = await this.userRepo.findOne({
       where: { email },
-      select: [
-        'email',
-        'id',
-        'name',
-        'role',
-        'receivedMessages',
-        'sentMessages',
-        'applications',
-      ],
+      select: ['email', 'id', 'name', 'role', 'applications'],
+      relations: ['applications'],
     });
 
     return userData;

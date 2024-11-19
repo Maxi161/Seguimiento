@@ -27,7 +27,7 @@ export class ConversationDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => User)
-  participants: User[];
+  participants: Partial<User>[];
 
   @IsArray()
   @ValidateNested({ each: true })

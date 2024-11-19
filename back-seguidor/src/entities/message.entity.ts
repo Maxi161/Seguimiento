@@ -22,9 +22,9 @@ export class Message {
 
   @ManyToOne(() => User, (user) => user.sentMessages)
   @JoinColumn({ name: 'senderId' })
-  sender: User;
+  sender: User | Partial<User>;
 
   @ManyToOne(() => User, (user) => user.receivedMessages)
   @JoinColumn({ name: 'receiverId' })
-  receiver: User;
+  receiver: User | Partial<User>;
 }
