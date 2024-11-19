@@ -61,13 +61,9 @@ export class MessageGateway {
       sender,
     );
     const receiverSocketId = this.connectedUsers.get(receiver.id);
-    if (receiverSocketId) {
-      this.server
-        .to([receiverSocketId, client.id])
-        .emit('receive-message', message);
-    } else {
-      console.log(`User ${receiver} not connected`);
-    }
+    this.server
+      .to([receiverSocketId, client.id])
+      .emit('receive-message', message);
   }
   @SubscribeMessage('get-messages')
   async handleGetMessages(

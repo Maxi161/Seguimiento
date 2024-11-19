@@ -74,7 +74,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       socket.emit('join-chat', userId);
       console.log("Conexión WebSocket iniciada");
       // Escuchar mensajes entrantes
-      socket.on('receive-message', (message: { sender: IUser; content: string, receiver: IUser, id: string, sentAt: Date }) => {
+      socket.on('receive-message', (message: IMessage) => {
         if (message.sender && message.receiver) {
           updateConversations(message);
         } else {
