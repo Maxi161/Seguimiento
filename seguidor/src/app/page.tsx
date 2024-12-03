@@ -14,9 +14,8 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const [formAppVisible, setFormAppVisible] = useState(false);
   const [users, setUsers] = useState<IUser[]>([]);
-  const [hasFetchedUsers, setHasFetchedUsers] = useState(false); // Estado para asegurarse de que getUsers se ejecute solo una vez
   const router = useRouter();
-  const { getUsers, loading, isLogged } = useUserContext();
+  const { getUsers, loading, isLogged, onProcess } = useUserContext();
 
   const toggleView = () => {
     setFormAppVisible((prevShowLogin) => !prevShowLogin);
@@ -29,17 +28,19 @@ export default function Home() {
   }, [isLogged, loading, router]);
 
   useEffect(() => {
-    // Solo ejecutamos la función de getUsers si no se ha hecho antes
-    if (!hasFetchedUsers && !loading && isLogged) {
+    // Verifica si ya se está cargando o si los usuarios ya están disponibles
+    if (!loading && isLogged && users.length === 0 && !onProcess.getUsers) {
       const saveUsers = async () => {
         const usersList = await getUsers();
         setUsers(usersList);
-        setHasFetchedUsers(true); // Marca que ya se cargaron los usuarios
       };
-
       saveUsers();
     }
-  }, [getUsers, isLogged, loading, hasFetchedUsers]);
+  
+    if (!loading && !isLogged) {
+      router.push("/auth");
+    }
+  }, [getUsers, isLogged, loading, users.length, router, onProcess.getUsers]);
 
   if (loading) return <Loader />;
 
@@ -51,7 +52,7 @@ export default function Home() {
           {formAppVisible ? (
             <ApplicationForm toggleView={toggleView} />
           ) : (
-            <FollowView toggleView={toggleView} />
+            <FollowView toggleView={toggleView} withButtons={true}/>
           )}
         </section>
         <section>

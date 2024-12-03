@@ -1,16 +1,17 @@
 "use client";
 
 import { UserContext } from "@/context/user.context";
-import { IApplication } from "@/interfaces/seguimiento.interface";
+import { IProcess } from "@/interfaces/process.interfaces";
+import { IApplication, IParsedApplication } from "@/interfaces/seguimiento.interface";
 import { IConnection, IConversation, IMessage, IUser } from "@/interfaces/user.interfaces";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-const rutaApi = "https://seguimiento-13h8.onrender.com";
+// const rutaApi = "https://seguimiento-13h8.onrender.com";
 
-// const rutaApi = "http://localhost:3005"
+const rutaApi = "http://localhost:3005"
 
 const socket = io(`${rutaApi}/message`, {
   reconnectionAttempts: 5,
@@ -23,7 +24,19 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<IUser | null>(null);
   const [isLogged, setIsLogged] = useState(false);
   const [loading, setLoading] = useState(true);  // Indicando carga de datos inicial
-  const [onProcess, setOnProcess] = useState(false);  // Indicando procesos en curso
+  const [onProcess, setOnProcess] = useState<IProcess>({
+    sendMessage: false,
+    login: false,
+    register: false,
+    saveApp: false,
+    getApps: false,
+    downloadApp: false,
+    changeConn: false,
+    sendConn: false,
+    getUsers: false,
+    getPendingConn: false,
+    getConn: false
+  });  // Indicando procesos en curso
   const [connections, setConnections] = useState<IConnection[]>([]);
   const [conversations, setConversations] = useState<IConversation[]>([])
   const [webSocketStatus, setWebSocketStatus] = useState(false)
@@ -120,23 +133,40 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
   const sendMessage = async (data: Partial<IMessage>) => {
-    try {
-      if (!data.sender || !data.receiver) {
-        console.error("El mensaje necesita un sender y un receiver válido.", data);
-        return;
+    if(!onProcess.sendMessage){
+      try {
+        if (!data.sender || !data.receiver) {
+          console.error("El mensaje necesita un sender y un receiver válido.", data);
+          return;
+        }
+        
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            sendMessage: true
+          }
+        });
+        // Emite el mensaje usando las propiedades correctas
+        socket.emit("send-message", {
+          receiver: data.receiver,
+          sender: data.sender,
+          content: data.content
+        });
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            sendMessage: false
+          }
+        });
+      } catch (err) {
+        console.log(err);
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            sendMessage: false
+          }
+        });
       }
-      
-      setOnProcess(true);
-      // Emite el mensaje usando las propiedades correctas
-      socket.emit("send-message", {
-        receiver: data.receiver,
-        sender: data.sender,
-        content: data.content
-      });
-      setOnProcess(false);
-    } catch (err) {
-      console.log(err);
-      setOnProcess(false);
     }
   };
   
@@ -144,145 +174,328 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Login logic
   const login = async (credentials: { email: string; password: string }) => {
-    try {
-      setOnProcess(true);
-      const { data } = await axios.post(`${rutaApi}/user/signin`, { ...credentials });
-      const user: IUser = data;
-      user.friends = await mapConnectionsToFriends(user);
-      setUser(user);
-      setIsLogged(true);
-      saveUserToLocalStorage(user);
-      setOnProcess(false);
-      getConnections(user?.id as string)
-      return true;
-    } catch (error) {
-      console.error(error);
-      setOnProcess(false);
-      alert("Error en el login");
-      return false;
+    if (!onProcess.login) {
+      try {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            login: true
+          }
+        });
+        const { data } = await axios.post(`${rutaApi}/user/signin`, { ...credentials });
+        const user: IUser = data;
+        user.friends = await mapConnectionsToFriends(user);
+        setUser(user);
+        setIsLogged(true);
+        saveUserToLocalStorage(user);
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            login: false
+          }
+        });
+        getConnections(user?.id as string)
+        return true;
+      } catch (error) {
+        console.error(error);
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            login: false
+          }
+        });
+        alert("Error en el login");
+        return false;
+      }
     }
+    return false
   };
 
   // Logout logic
   const logout = () => {
+    router.push("/auth");
     setUser(null);
     setIsLogged(false);
     closeWebSocketConnection(user?.id as string)
     localStorage.removeItem("user");
-    router.push("/auth");
+    setConversations([])
+    setConnections([])
   };
 
   // Save application data
   const saveApplication = async (formData: Partial<IApplication>) => {
-    try {
-      setOnProcess(true);
-      const data = { ...formData, userId: user?.id };
-      await axios.post(`${rutaApi}/application`, { ...data });
-
-      const res = await axios.get(`${rutaApi}/application/${user?.email}`);
-      const apps = res.data as IApplication[];
-      const updatedUser = { ...user, applications: [...apps] } as IUser;
-      setUser(updatedUser);
-      saveUserToLocalStorage(updatedUser);
-      setOnProcess(false);
-    } catch (error) {
-      console.error(error);
-      setOnProcess(false);
+    if (!onProcess.saveApp) {
+      try {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            saveApp: true
+          }
+        });
+        const data = { ...formData, userId: user?.id };
+        await axios.post(`${rutaApi}/application`, { ...data });
+  
+        const res = await axios.get(`${rutaApi}/application/${user?.email}`);
+        const apps = res.data as IApplication[];
+        const updatedUser = { ...user, applications: [...apps] } as IUser;
+        setUser(updatedUser);
+        saveUserToLocalStorage(updatedUser);
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            saveApp: false
+          }
+        });
+      } catch (error) {
+        console.error(error);
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            saveApp: false
+          }
+        });
+      }
     }
   };
 
+  const getApplications = async (email: string) => {
+    if(!onProcess.getApps){
+      try {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            getApps: true
+          }
+        });
+  
+        const res = await axios.get(`${rutaApi}/application/${email}`);
+        const data: IParsedApplication[] = res.data;
+  
+        const student: IUser | undefined = user?.friends.find((user) => user.email === email);
+        if(!student) return console.log(`Usuario con el email ${email} no se ha encontrado`)
+        student.applications = data;
+        console.log("se acaba de realizar una petición para el usuario ", email)
+              setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            getApps: false
+          }
+        });
+      } catch (err) {
+        console.log(err);
+              setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            getApps: false
+          }
+        });
+      }
+    }
+  }
+
   // Register new user logic
   const register = async (newUser: { name: string; email: string; password: string; confirmPassword: string }) => {
-    try {
-      setOnProcess(true);
-      const { data } = await axios.post(`${rutaApi}/user/signup`, { ...newUser });
-      const user: IUser = data;
-      saveUserToLocalStorage(user);
-      setOnProcess(false);
-      return true;
-    } catch (error) {
-      console.error(error);
-      setOnProcess(false);
-      alert("Error al registrar usuario");
-      return false;
+    if(!onProcess.register){
+      try {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            register: true
+          }
+        });
+        const { data } = await axios.post(`${rutaApi}/user/signup`, { ...newUser });
+        const user: IUser = data;
+        saveUserToLocalStorage(user);
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            register: false
+          }
+        });
+        return true;
+      } catch (error) {
+        console.error(error);
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            register: false
+          }
+        });
+        alert("Error al registrar usuario");
+        return false;
+      }
     }
+    return false
   };
 
   // Download user data
   const downloadData = async () => {
-    try {
-      setOnProcess(true);
-      await axios.post(`${rutaApi}/data/add-data/${user?.email}`);
-      const response = await axios.get(`${rutaApi}/data/${user?.email}`, {
-        responseType: "blob",
-      });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `${user?.email}_data.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      setOnProcess(false);
-    } catch (error) {
-      setOnProcess(false);
-      console.error("Error al descargar el archivo", error);
+    if(!onProcess.downloadApp){
+      try {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            downloadApp: true
+          }
+        });
+        await axios.post(`${rutaApi}/data/add-data/${user?.email}`);
+        const response = await axios.get(`${rutaApi}/data/${user?.email}`, {
+          responseType: "blob",
+        });
+  
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `${user?.email}_data.xlsx`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            downloadApp: false
+          }
+        });
+      } catch (error) {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            downloadApp: false
+          }
+        });
+        console.error("Error al descargar el archivo", error);
+      }
     }
   };
 
   // Send connection request
   const sendConnection = async (userAId: string, userBId: string) => {
-    try {
-      setOnProcess(true);
-      await axios.post(`${rutaApi}/connections/request`, { userAId, userBId });
-      setOnProcess(false);
-      getConnections(user?.id as string)
-    } catch (err) {
-      setOnProcess(false);
-      console.error("Error al enviar solicitud de conexión:", err);
+    if(!onProcess.sendConn){
+      try {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            sendConn: true
+          }
+        });
+        await axios.post(`${rutaApi}/connections/request`, { userAId, userBId });
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            sendConn: false
+          }
+        });
+        getConnections(user?.id as string)
+      } catch (err) {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            sendConn: false
+          }
+        });
+        console.error("Error al enviar solicitud de conexión:", err);
+      }
     }
   };
 
   // Change connection status (accept or block)
   const changeConnection = async (id: string, action: "accept" | "reject" | "block") => {
-    try {
-      setOnProcess(true);
-      const res = await axios.patch(`${rutaApi}/connections/${id}/${action}`);
-      const conn: IConnection = res.data;
-      const userForConn = conn.userA.id !== user?.id ? conn.userA : conn.userB;
-
-      if (action === "accept" && user) {
-        const updatedUser = {
-          ...user,
-          friends: [...(user.friends || []), userForConn],
-        };
-        setUser(updatedUser);
-        saveUserToLocalStorage(updatedUser);
+    if(!onProcess.changeConn){
+      try {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            changeConn: true
+          }
+        });
+        const res = await axios.patch(`${rutaApi}/connections/${id}/${action}`);
+        const conn: IConnection = res.data;
+        const userForConn = conn.userA.id !== user?.id ? conn.userA : conn.userB;
+  
+        if (action === "accept" && user) {
+          const updatedUser = {
+            ...user,
+            friends: [...(user.friends || []), userForConn],
+          };
+          setUser(updatedUser);
+          saveUserToLocalStorage(updatedUser);
+        }
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            changeConn: false
+          }
+        });
+      } catch (err) {
+        console.error("Error al cambiar conexión:", err);
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            changeConn: false
+          }
+        });
       }
-      setOnProcess(false);
-    } catch (err) {
-      console.error("Error al cambiar conexión:", err);
-      setOnProcess(false);
     }
   };
 
   const getUsers = async () => {
-    setOnProcess(true);
-    const res = await axios.get(`${rutaApi}/user`);
-    const users = res.data;
-    setOnProcess(false);
-    return users;
+    if(!onProcess.getUsers){
+      try {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            getUsers: true
+          }
+        });
+        const res = await axios.get(`${rutaApi}/user`);
+        const users = res.data;
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            getUsers: false
+          }
+        });
+        return users;
+      } catch (error) {
+        console.log(error)
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            getUsers: false
+          }
+        });
+      }
+    }
   };
 
   const getConnections = async (id: string) => {
-    try {
-      const res = await axios.get(`${rutaApi}/connections/${id}`);
-      const conns: IConnection[] = res.data;
-      setConnections(conns);
-    } catch (err) {
-      console.log("Error al obtener conexiones:", err);
+    if(!onProcess.getConn){
+      try {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            getConn: true
+          }
+        })
+        const res = await axios.get(`${rutaApi}/connections/${id}`);
+        const conns: IConnection[] = res.data;
+        setConnections(conns);
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            getConn: false
+          }
+        })
+      } catch (err) {
+        console.log("Error al obtener conexiones:", err);
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            getConn: false
+          }
+        })
+      }
     }
   };
   
@@ -294,15 +507,32 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
   const getPendingConnections = async (id: string) => {
-    try {
-      setOnProcess(true)
-      const res = await axios.get(`${rutaApi}/connections/${id}/pending`)
-      const data = res?.data;
-      setOnProcess(false)
-      return data
-    } catch (error) {
-      setOnProcess(false)
-      console.log("error al obtener las conexiones pendientes: ", error)
+    if(!onProcess.getPendingConn){
+      try {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            getPendingConn: true
+          }
+        });
+        const res = await axios.get(`${rutaApi}/connections/${id}/pending`)
+        const data = res?.data;
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            getPendingConn: false
+          }
+        });
+        return data
+      } catch (error) {
+        setOnProcess((prevProcess) => {
+          return {
+            ...prevProcess,
+            getPendingConn: false
+          }
+        });
+        console.log("error al obtener las conexiones pendientes: ", error)
+      }
     }
   }
 
@@ -348,10 +578,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         getConnections,
         sendMessage,
         getPendingConnections,
-        getMessagesWith
+        getMessagesWith,
+        getApplications,
       }}
     >
       {children}
     </UserContext.Provider>
   );
 };
+
+
+// Load SVG
+{/* <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="white" d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z" opacity="0.5"/><path fill="white" d="M20 12h2A10 10 0 0 0 12 2V4A8 8 0 0 1 20 12Z"><animateTransform attributeName="transform" dur="1s" from="0 12 12" repeatCount="indefinite" to="360 12 12" type="rotate"/></path></svg> */}

@@ -17,7 +17,11 @@ const ButtonConnection: React.FC<ButtonConnectionProps> = ({ userId }) => {
 
   // Efecto para verificar si hay una conexión existente cada vez que `connections` cambia
   useEffect(() => {
+
     const actualConn = connections.some((conn) => conn.userB.id === userId);
+    if(actualConn) console.log(userId, " es amigo mio")
+    if(!actualConn) console.log(userId, " no es amigo mio")
+    console.log(connections)
     setIsChecked(actualConn);
   }, [connections, userId]);
 
