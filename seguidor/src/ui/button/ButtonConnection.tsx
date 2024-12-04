@@ -19,9 +19,6 @@ const ButtonConnection: React.FC<ButtonConnectionProps> = ({ userId }) => {
   useEffect(() => {
 
     const actualConn = connections.some((conn) => conn.userB.id === userId);
-    if(actualConn) console.log(userId, " es amigo mio")
-    if(!actualConn) console.log(userId, " no es amigo mio")
-    console.log(connections)
     setIsChecked(actualConn);
   }, [connections, userId]);
 

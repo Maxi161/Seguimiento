@@ -49,7 +49,7 @@ export interface UserContextType {
   }) => Promise<boolean>;
   logout: () => void;
   saveApplication: (data: IApplication) => Promise<void>;
-  downloadData: () => Promise<void>;
+  downloadData: (email: string) => Promise<void>;
   getUsers: () => Promise<IUser[]>;
   sendConnection: (userA: string, userB: string) => Promise<void>;
   changeConnection: (

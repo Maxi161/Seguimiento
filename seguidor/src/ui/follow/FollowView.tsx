@@ -1,5 +1,6 @@
 import { useUserContext } from "@/context/user.context"; 
 import { IParsedApplication } from "@/interfaces/seguimiento.interface";
+import { IUser } from "@/interfaces/user.interfaces";
 import {
   Table,
   TableHeader,
@@ -11,30 +12,33 @@ import {
   Pagination,
 } from "@nextui-org/react";
 import { motion } from "framer-motion";
-import React from "react";
+import React, { useState } from "react";
 
-const FollowView = ({ toggleView, withButtons, rechargeButton, applicationsData, handleReload}: { 
+const FollowView = ({ toggleView, withButtons, rechargeButton, handleReload, userSeguimiento}: { 
   toggleView?: () => void;
   withButtons?: boolean; 
   applicationsData?: IParsedApplication[];
   rechargeButton?: boolean;
   handleReload?: () => void;
+  userSeguimiento?: Partial<IUser>
 }) => {
-  const { user, downloadData, onProcess } = useUserContext();
+  const [ downloadStates, setDownloadStates] = React.useState<Record<string, boolean>>({});
+  const [ isReloading, setIsReloading ] = useState(false)
+  const { user, downloadData } = useUserContext();
   const appsAmount = React.useMemo(() => {
-    if (Array.isArray(applicationsData)) {
-      return applicationsData.length;
+    if (Array.isArray(userSeguimiento?.applications)) {
+      return userSeguimiento.applications.length;
     }
     return user?.applications?.length || 0;
-  }, [applicationsData, user?.applications]);
+  }, [userSeguimiento?.applications, user?.applications]);
   
   
   const applications = React.useMemo(() => {
-    if (!applicationsData) {
+    if (!userSeguimiento?.applications) {
       return user?.applications || [];
     } 
-    return applicationsData;
-  }, [applicationsData, user?.applications]);
+    return userSeguimiento.applications;
+  }, [userSeguimiento?.applications, user?.applications]);
   const [page, setPage] = React.useState(1);
   const rowsPerPage = 5;
 
@@ -66,11 +70,14 @@ const FollowView = ({ toggleView, withButtons, rechargeButton, applicationsData,
     { key: "status", label: "Status" },
   ];
 
-  const downloadHandler = async () => {
+  const downloadHandler = async (email: string) => {
+    setDownloadStates((prev) => ({ ...prev, [email]: true }));
     try {
-      await downloadData();
+      await downloadData(email);
     } catch (error) {
-      console.log(error);
+      console.error(error);
+    } finally {
+      setDownloadStates((prev) => ({ ...prev, [email]: false }));
     }
   };
 
@@ -105,10 +112,10 @@ const FollowView = ({ toggleView, withButtons, rechargeButton, applicationsData,
       <div className="flex justify-center items-center m-5 relative">
         <button 
           type="button" 
-          onClick={downloadHandler} 
-          className="bg-teal-700 text-white px-4 py-2 rounded absolute bottom-0 left-0 md:w-2/12 flex justify-center items-center"
+          onClick={() => downloadHandler(userSeguimiento?.email as string)}
+          className={`${downloadStates[userSeguimiento?.email as string] ? "bg-teal-950 cursor-not-allowed" : "bg-teal-900"} text-white px-4 py-2 rounded absolute bottom-0 left-0 md:w-2/12 flex justify-center items-center`}
         >
-          {onProcess.downloadApp ? 
+          {downloadStates[userSeguimiento?.email as string] ? 
           <svg
            xmlns="http://www.w3.org/2000/svg" 
            width="25"
@@ -148,24 +155,53 @@ const FollowView = ({ toggleView, withButtons, rechargeButton, applicationsData,
         >
           Subir
         </button> : null}
-        {rechargeButton ? <button 
-          onClick={handleReload} 
-          type="button" 
-          className="bg-purple-900 text-white px-4 py-2 rounded absolute bottom-0 right-0"
+        {rechargeButton ? (
+  <button
+    onClick={() => {
+      setIsReloading(true);
+      handleReload?.(); // Invoca el manejador proporcionado.
+      setTimeout(() => setIsReloading(false), 1000); // Simula un estado de recarga.
+    }}
+    type="button"
+    className={`${
+      isReloading ? "bg-purple-950 cursor-not-allowed" : "bg-purple-900"
+    } text-white px-4 py-2 rounded absolute bottom-0 right-0 flex items-center justify-center`}
+    disabled={isReloading}
+  >
+    {isReloading ? (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="28"
+        height="28"
+        viewBox="0 0 512 512"
+        className="animate-spin"
+      >
+        <path
+          fill="white"
+          fillRule="evenodd"
+          d="M298.667 213.333v-42.666l79.898-.003c-26.986-38.686-71.82-63.997-122.565-63.997c-82.475 0-149.333 66.858-149.333 149.333S173.525 405.333 256 405.333c76.201 0 139.072-57.074 148.195-130.807l42.342 5.292C434.807 374.618 353.974 448 256 448c-106.039 0-192-85.961-192-192S149.961 64 256 64c60.316 0 114.136 27.813 149.335 71.313L405.333 64H448v149.333z"
+        />
+      </svg>
+    ) : (
+      <>
+        <span className="mr-2">Recargar</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 512 512"
         >
-          <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="28" 
-          height="28" 
-          viewBox="0 0 512 512">
-            <path 
-            fill="white" 
-            fillRule="evenodd" 
-            d="M298.667 213.333v-42.666l79.898-.003c-26.986-38.686-71.82-63.997-122.565-63.997c-82.475 0-149.333 66.858-149.333 149.333S173.525 405.333 256 405.333c76.201 0 139.072-57.074 148.195-130.807l42.342 5.292C434.807 374.618 353.974 448 256 448c-106.039 0-192-85.961-192-192S149.961 64 256 64c60.316 0 114.136 27.813 149.335 71.313L405.333 64H448v149.333z"/>
-          </svg>
-        </ button>
-          : null
-        }
+          <path
+            fill="white"
+            fillRule="evenodd"
+            d="M298.667 213.333v-42.666l79.898-.003c-26.986-38.686-71.82-63.997-122.565-63.997c-82.475 0-149.333 66.858-149.333 149.333S173.525 405.333 256 405.333c76.201 0 139.072-57.074 148.195-130.807l42.342 5.292C434.807 374.618 353.974 448 256 448c-106.039 0-192-85.961-192-192S149.961 64 256 64c60.316 0 114.136 27.813 149.335 71.313L405.333 64H448v149.333z"
+          />
+        </svg>
+      </>
+    )}
+  </button>
+) : null}
+
       </div>
     </>
   );

@@ -259,39 +259,45 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const getApplications = async (email: string) => {
-    if(!onProcess.getApps){
+    if (!onProcess.getApps) {
       try {
-        setOnProcess((prevProcess) => {
-          return {
-            ...prevProcess,
-            getApps: true
-          }
-        });
+        // Marcar que estamos procesando la solicitud
+        setOnProcess((prevProcess) => ({
+          ...prevProcess,
+          getApps: true,
+        }));
   
         const res = await axios.get(`${rutaApi}/application/${email}`);
-        const data: IParsedApplication[] = res.data;
+        const data: IParsedApplication[] = res.data || []; // Asignamos un arreglo vacío en caso de que no haya datos.
   
         const student: IUser | undefined = user?.friends.find((user) => user.email === email);
-        if(!student) return console.log(`Usuario con el email ${email} no se ha encontrado`)
-        student.applications = data;
-        console.log("se acaba de realizar una petición para el usuario ", email)
-              setOnProcess((prevProcess) => {
-          return {
-            ...prevProcess,
-            getApps: false
-          }
-        });
+        if (!student) {
+          console.log(`Usuario con el email ${email} no se ha encontrado`);
+          return;
+        }
+        
+        // Aseguramos que applications sea un arreglo, aunque sea vacío
+        student.applications = data.length ? data : [];
+  
+        console.log("Se acaba de realizar una petición para el usuario ", email);
+  
+        // Desmarcar el estado de procesamiento
+        setOnProcess((prevProcess) => ({
+          ...prevProcess,
+          getApps: false,
+        }));
       } catch (err) {
         console.log(err);
-              setOnProcess((prevProcess) => {
-          return {
-            ...prevProcess,
-            getApps: false
-          }
-        });
+  
+        // Desmarcar el estado de procesamiento en caso de error
+        setOnProcess((prevProcess) => ({
+          ...prevProcess,
+          getApps: false,
+        }));
       }
     }
-  }
+  };
+  
 
   // Register new user logic
   const register = async (newUser: { name: string; email: string; password: string; confirmPassword: string }) => {
@@ -329,7 +335,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Download user data
-  const downloadData = async () => {
+  const downloadData = async (email: string) => {
     if(!onProcess.downloadApp){
       try {
         setOnProcess((prevProcess) => {
@@ -338,15 +344,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             downloadApp: true
           }
         });
-        await axios.post(`${rutaApi}/data/add-data/${user?.email}`);
-        const response = await axios.get(`${rutaApi}/data/${user?.email}`, {
+        await axios.post(`${rutaApi}/data/add-data/${email}`);
+        const response = await axios.get(`${rutaApi}/data/${email}`, {
           responseType: "blob",
         });
   
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", `${user?.email}_data.xlsx`);
+        link.setAttribute("download", `${email}_data.xlsx`);
         document.body.appendChild(link);
         link.click();
         link.remove();
