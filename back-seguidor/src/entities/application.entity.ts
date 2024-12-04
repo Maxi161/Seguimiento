@@ -25,7 +25,7 @@ export class Application {
   @Column()
   comments: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'date', nullable: true, default: new Date() })
   applicationDate: Date;
 
   // Contact fields

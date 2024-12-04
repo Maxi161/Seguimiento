@@ -136,41 +136,44 @@ export class DataController {
     file: Express.Multer.File,
     @Param('email') email: string,
   ) {
-    const exportDir = path.join(__dirname, '..', 'exports');
-    const filePath = path.join(exportDir, `${email}_data.xlsx`);
-
-    if (!fs.existsSync(exportDir)) {
-      fs.mkdirSync(exportDir);
-    }
-
-    let workbook;
-    if (fs.existsSync(filePath)) {
-      workbook = XLSX.readFile(filePath);
-    } else {
-      workbook = XLSX.utils.book_new();
-    }
-
-    let worksheet = workbook.Sheets[`${email} Data`];
-    if (!worksheet) {
-      worksheet = XLSX.utils.json_to_sheet([]);
-      XLSX.utils.book_append_sheet(workbook, worksheet, `${email} Data`);
-    }
-
     const uploadedWorkbook = XLSX.read(file.buffer, { type: 'buffer' });
     const uploadedSheet =
       uploadedWorkbook.Sheets[uploadedWorkbook.SheetNames[0]];
     const newData = XLSX.utils.sheet_to_json(uploadedSheet);
 
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-    jsonData.push(...newData);
-    const updatedWorksheet = XLSX.utils.json_to_sheet(jsonData);
+    const user = await this.userRepo.findOne({ where: { email } });
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
 
-    workbook.Sheets[`${email} Data`] = updatedWorksheet;
-    XLSX.writeFile(workbook, filePath);
+    const applicationsToInsert = newData.map((row: any) => {
+      return this.appRepo.create({
+        user,
+        id: row['ID'],
+        status: row['estado'],
+        company: row['empresa'],
+        position: row['pisicion'],
+        actions: row['acciones'] || null,
+        comments: row['comentarios'] || null,
+        applicationDate: row['fecha_postulacion'] || null,
+        recruiterName: row['nobmre_reclutador'] || null,
+        companyContact: row['contacto_empresa'] || null,
+        industry: row['rubro'] || null,
+        applicationLink: row['link_postulacion'] || null,
+        platform: row['plataforma'] || null,
+        phoneScreen: row['filtro_telefonico'] || null,
+        firstInterview: row['primera_entrevista'] || null,
+        secondInterview: row['segunda_entrevista'] || null,
+        thirdInterview: row['tercer_entrevista'] || null,
+        extraInterview: row['entrevista_extra'] || null,
+      });
+    });
+
+    await this.appRepo.save(applicationsToInsert);
 
     return {
-      message: 'Archivo actualizado exitosamente',
-      fileName: `${email}_data.xlsx`,
+      message: 'Data successfully added to database',
+      insertedRecords: applicationsToInsert.length,
     };
   }
 }
