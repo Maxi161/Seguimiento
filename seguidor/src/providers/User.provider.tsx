@@ -10,10 +10,10 @@ import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
 // const rutaApi0 = "https://seguimiento-13h8.onrender.com";
-// const rutaAPi = "https://seguimiento-4rct.onrender.com";
 
+// const rutaAPi = "http://localhost:3005";
 
-cosnt rutaAPi = "https://seguimiento-4rct.onrender.com";
+const rutaApi = "https://seguimiento-4rct.onrender.com";
 
 const socket = io(`${rutaApi}/message`, {
   reconnectionAttempts: 5,
