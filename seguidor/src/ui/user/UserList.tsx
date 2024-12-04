@@ -1,4 +1,3 @@
-"use client"
 import React, { useState, useMemo, useEffect } from 'react';
 import { IUser } from "@/interfaces/user.interfaces";
 import { Input, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, User } from "@nextui-org/react";
@@ -6,16 +5,15 @@ import ButtonConnection from '../button/ButtonConnection';
 import { useUserContext } from '@/context/user.context';
 
 const UserList = ({ users, header }: { users: IUser[]; header: boolean }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { user, getConnections } = useUserContext();
   const [inputValue, setInputValue] = useState("");
 
-  // Filtrado de usuarios por el nombre
+  // Filtrado de usuarios por el nombre y excluyendo al usuario actual
   const usersFiltered = useMemo(() => {
-    return users.filter((user) =>
-      user.name.toLowerCase().includes(inputValue.toLowerCase())
-    );
-  }, [users, inputValue]);
+    return users
+      .filter((u) => u.id !== user?.id) // Excluye al usuario actual
+      .filter((user) => user.name.toLowerCase().includes(inputValue.toLowerCase()));
+  }, [users, inputValue, user?.id]); // Agregar user?.id como dependencia
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -23,11 +21,10 @@ const UserList = ({ users, header }: { users: IUser[]; header: boolean }) => {
     setInputValue(value);
   };
 
-
   const columns = [
     { key: "users", label: "Usuarios" },
     { key: "role", label: "Rol" },
-    { key: "button", label: "" }, // Columna para el botón
+    { key: "button", label: "" },
   ];
 
   const renderCell = (user: IUser, columnKey: unknown) => {
@@ -40,7 +37,7 @@ const UserList = ({ users, header }: { users: IUser[]; header: boolean }) => {
         return (
           <Tooltip content="Conectar" className="bg-inherit">
             <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-              <ButtonConnection userId={user.id} /> {/* Renderizando el botón */}
+              <ButtonConnection userId={user.id} />
             </span>
           </Tooltip>
         );
@@ -58,19 +55,18 @@ const UserList = ({ users, header }: { users: IUser[]; header: boolean }) => {
     []
   );
 
-      // Efecto para obtener conexiones solo al montar el componente
   useEffect(() => {
     const getConn = async () => {
       await getConnections(user?.id as string);
-    }
+    };
     if (user?.id) {
-      getConn()
-      console.log("se actualizó")
+      getConn();
+      console.log("se actualizó");
     }
   }, []);
 
   return (
-    <section className="w-8/12 h-auto flex justify-center flex-col items-center m-12">
+    <section className="w-8/12 h-auto flex justify-center flex-col items-center m-12" id="userList">
       <Input value={inputValue} onChange={handleChange} placeholder="Buscar usuarios..." />
 
       <Table hideHeader={!header} removeWrapper aria-label="Usuarios" classNames={classNames}>
@@ -78,11 +74,11 @@ const UserList = ({ users, header }: { users: IUser[]; header: boolean }) => {
           {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
         </TableHeader>
         <TableBody emptyContent={"Aún sin usuarios :C"} items={usersFiltered}>
-          {(user) => (
-            <TableRow key={user.id}>
+          {(userFilter) => (
+            <TableRow key={userFilter.id}>
               {(columnKey) => (
-                <TableCell key={columnKey}>
-                  {renderCell(user, columnKey)}
+                <TableCell key={`${columnKey}-${userFilter.id}`}>
+                  {renderCell(userFilter, columnKey)}
                 </TableCell>
               )}
             </TableRow>

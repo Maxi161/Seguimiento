@@ -1,3 +1,4 @@
+import { IProcess } from "./process.interfaces";
 import { IApplication, IParsedApplication } from "./seguimiento.interface";
 
 export interface IConnection {
@@ -36,7 +37,7 @@ export interface UserContextType {
   user: IUser | null;
   isLogged: boolean;
   loading: boolean;
-  onProcess: boolean;
+  onProcess: Partial<IProcess>;
   connections: IConnection[];
   conversations: IConversation[];
   login: (credentials: { email: string; password: string }) => Promise<boolean>;
@@ -48,7 +49,7 @@ export interface UserContextType {
   }) => Promise<boolean>;
   logout: () => void;
   saveApplication: (data: IApplication) => Promise<void>;
-  downloadData: () => Promise<void>;
+  downloadData: (email: string) => Promise<void>;
   getUsers: () => Promise<IUser[]>;
   sendConnection: (userA: string, userB: string) => Promise<void>;
   changeConnection: (
@@ -59,4 +60,5 @@ export interface UserContextType {
   sendMessage: (data: Partial<IMessage>) => Promise<void>;
   getPendingConnections: (id: string) => Promise<IConnection[]>;
   getMessagesWith: (userAID: string, userBID: string) => Promise<void>;
+  getApplications: (email: string) => Promise<void>;
 }

@@ -29,7 +29,7 @@ const initialApplicationState: IApplication = {
 type ApplicationKeys = keyof IApplication;
 
 const ApplicationForm = ({ toggleView }: { toggleView: () => void}) => {
-  const {saveApplication} = useUserContext();
+  const {saveApplication, onProcess} = useUserContext();
   const [applicationData, setApplicationData] = useState<IApplication>(initialApplicationState);
   const [errors, setErrors] = useState<IApplicationFormErrors>({});
   const [currentIndex, setCurrentIndex] = useState(0); // Índice del campo actual
@@ -92,7 +92,7 @@ const ApplicationForm = ({ toggleView }: { toggleView: () => void}) => {
     if (Object.keys(formErrors).length === 0) {
       // Si es el último campo, puedes manejar el envío del formulario
       if (currentIndex === inputFields.length - 1) {
-        console.log("Form data:", applicationData);
+
         await saveApplication(applicationData as IApplication)
         setApplicationData(initialApplicationState)
         setCurrentIndex(0)
@@ -132,8 +132,32 @@ const ApplicationForm = ({ toggleView }: { toggleView: () => void}) => {
           {currentIndex > 0 && (
             <button type="button" onClick={handlePrev} className="bg-gray-500 text-white px-4 py-2 rounded absolute bottom-0 left-0">Anterior</button>
           )}
-          <button type="submit" className="bg-purple-900 text-white px-4 py-2 rounded absolute bottom-0 right-0">
-            {currentIndex === inputFields.length - 1 ? "Guardar" : "Siguiente"}
+          <button type="submit" className="bg-purple-900 text-white px-4 py-2 rounded absolute bottom-0 right-0" disabled={onProcess.saveApp}>
+            {currentIndex === inputFields.length - 1 && !onProcess.saveApp ? "Guardar" : null}
+            {currentIndex !== inputFields.length - 1 ? "siguiente" : null}
+            {onProcess.saveApp ? 
+              <svg
+              xmlns="http://www.w3.org/2000/svg" 
+              width="25"
+              height="25" 
+              viewBox="0 0 24 24">
+                <path 
+                fill="white"
+                d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z" 
+                opacity="0.5"/>
+                <path 
+                fill="white" 
+                d="M20 12h2A10 10 0 0 0 12 2V4A8 8 0 0 1 20 12Z">
+                  <animateTransform 
+                  attributeName="transform" 
+                  dur="1s" 
+                  from="0 12 12" 
+                  repeatCount="indefinite" 
+                  to="360 12 12" 
+                  type="rotate"/>
+                </path>
+              </svg>
+            : null}
           </button>
         </div>
       </form>

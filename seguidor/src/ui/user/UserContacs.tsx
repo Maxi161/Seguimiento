@@ -10,7 +10,7 @@ export const UserContacList = ({
   friends: IUser[];
   setOnFriend: (user: Partial<IUser>) => void;
 }) => {
-  const { getMessagesWith, user } = useUserContext();
+  const { getMessagesWith, user, conversations } = useUserContext();
   
   // Usamos un estado que almacena un objeto con el estado de carga para cada amigo
   const [messagesLoad, setMessagesLoad] = useState<Record<string, boolean>>({});
@@ -18,11 +18,17 @@ export const UserContacList = ({
   const handlerClick = (friend: Partial<IUser>) => {
     setOnFriend(friend);
 
-    // Verificamos si los mensajes ya fueron cargados para este amigo
-    if (!messagesLoad[friend.id as string]) {
-      // Si no han sido cargados, realizamos la petición
+    // Verificar si ya existe una conversación con este amigo
+    const conversationExists = conversations.some((conver) =>
+      conver.participants.some((participant) => participant?.id === friend.id)
+    );
+
+    // Si no existe una conversación cargada y no está marcada como cargada
+    if (!conversationExists && !messagesLoad[friend.id as string]) {
+      // Realizar la petición
       getMessagesWith(user?.id as string, friend.id as string);
-      // Actualizamos el estado para marcar que los mensajes de este amigo están cargados
+
+      // Actualizar el estado para marcar que los mensajes de este amigo están cargados
       setMessagesLoad((prevState) => ({
         ...prevState,
         [friend.id as string]: true,
