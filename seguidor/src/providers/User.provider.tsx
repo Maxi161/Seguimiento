@@ -9,9 +9,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-// const rutaApi = "https://seguimiento-13h8.onrender.com";
+// const rutaApi0 = "https://seguimiento-13h8.onrender.com";
 
-const rutaApi = "https://seguimiento-4rct.onrender.com"
+// const rutaAPi = "http://localhost:3005";
+
+const rutaApi = "https://seguimiento-4rct.onrender.com";
 
 const socket = io(`${rutaApi}/message`, {
   reconnectionAttempts: 5,
@@ -335,15 +337,19 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Download user data
-  const downloadData = async (email: string) => {
+  const downloadData = async (userEmail: string) => {
     if(!onProcess.downloadApp){
       try {
+        const email = userEmail ?? user?.email;
         setOnProcess((prevProcess) => {
           return {
             ...prevProcess,
             downloadApp: true
           }
         });
+        if(!email){
+
+        }
         await axios.post(`${rutaApi}/data/add-data/${email}`);
         const response = await axios.get(`${rutaApi}/data/${email}`, {
           responseType: "blob",
