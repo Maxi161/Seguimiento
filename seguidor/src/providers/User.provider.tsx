@@ -13,7 +13,7 @@ import { io } from "socket.io-client";
 // const rutaAPi = "https://seguimiento-4rct.onrender.com";
 
 
-const rutaApi = "http://localhost:3005"
+cosnt rutaAPi = "https://seguimiento-4rct.onrender.com";
 
 const socket = io(`${rutaApi}/message`, {
   reconnectionAttempts: 5,
