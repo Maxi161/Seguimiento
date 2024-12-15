@@ -1,5 +1,3 @@
-"use client"
-
 import { UserContextType } from "@/interfaces/user.interfaces";
 import { createContext, useContext } from "react";
 
