@@ -1,3 +1,5 @@
+"use client"
+
 import { useUserContext } from "@/context/user.context";
 import Loader from "@/ui/loader/Loader";
 import UsersFollowView from "@/ui/usersFollowView/UsersFollowView"
