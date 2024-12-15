@@ -4,11 +4,13 @@ import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './user.dtos';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserRepository {
   constructor(
     @InjectRepository(User) private readonly userRepo: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async getAll() {
@@ -86,8 +88,22 @@ export class UserRepository {
       where: { email },
       select: ['email', 'id', 'name', 'role', 'applications'],
       relations: ['applications'],
+      order: {
+        applications: {
+          applicationDate: 'ASC', // Ordena las aplicaciones por fecha ascendente
+        },
+      },
     });
 
-    return userData;
+    const payload = {
+      sub: userFound.id,
+      id: userFound.id,
+      email: userFound.email,
+      role: userFound.role,
+    };
+
+    const token = this.jwtService.sign(payload);
+
+    return { userData, token };
   }
 }

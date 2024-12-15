@@ -115,6 +115,7 @@ export default function MessagesPage() {
   }, [friendOn, conversations, borrador]);
 
   if (loading) return <Loader />;
+  
   return (
     <div className="w-full min-h-screen flex justify-center p-5">
       <div className="w-9/12 h-[calc(100vh - 40px)] flex flex-row">

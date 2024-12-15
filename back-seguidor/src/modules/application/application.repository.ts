@@ -35,8 +35,15 @@ export class ApplicationRepository {
   }
 
   async createApplication(appData: Partial<Application>) {
-    const newApp = await this.appRepo.save(appData);
+    await this.appRepo.save(appData);
+    const allApps = await this.appRepo.find({ where: { user: appData.user } });
 
+    return allApps;
+  }
+
+  async updateApp(app: Partial<Application>) {
+    const newApp = await this.appRepo.save(app);
+    console.log(app);
     return newApp;
   }
 }

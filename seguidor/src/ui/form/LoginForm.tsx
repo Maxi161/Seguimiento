@@ -6,13 +6,13 @@ import { motion } from "framer-motion"
 import { useState } from "react";
 import InputField from "./FieldForForm";
 import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
 
 
 const LoginForm = ({ toggleForm }: { toggleForm: () => void }) => {
 
   const {login} = useUserContext()
   const router = useRouter();
-
   const [formData, setFormData] = useState({
     email: '',
     password: "",
@@ -53,16 +53,29 @@ const LoginForm = ({ toggleForm }: { toggleForm: () => void }) => {
     if (Object.keys(validationErrors).length === 0) {
       try {
         const success = await login({ ...formData });
-        if (success) {
+        if (success && !isAxiosError(success)) {
           router.push("/");
         } else {
-          alert("Login failed");
+          setErrors({});
         }
-      } catch (error) {
-        console.log(error);
+      } catch (err) {
+        setErrors({});
+        if(isAxiosError(err)){
+          const {error} = err.response?.data
+          console.log(error)
+          switch(error){
+            case "Unauthorized": setErrors((prevErrors) => {
+              return {...prevErrors, unauthorized: true}
+            })
+                                  break
+            case "user not found": setErrors((prevErrors) => {
+              return {...prevErrors, userNotFound: true}
+            })
+                                  break
+          }
+        }
       }
       setFormData({ email: '', password: '' });
-      setErrors({});
     } else {
       setErrors(validationErrors);
     }
@@ -103,7 +116,10 @@ const LoginForm = ({ toggleForm }: { toggleForm: () => void }) => {
         value={formData.password}
         error={errors.password}
        />
-      
+      <div className="flex justify-center items-center flex-col">
+      {errors.unauthorized ? <span className="text-danger-500">El email o la contraseña son incorrectos</span> : null}
+      {errors.userNotFound ? <span className="text-danger-500">EL usuario no se ha encontrado</span> : null}
+      </div>
       <div className="flex w-full h-full justify-evenly items-center">
         <button type="button" onClick={toggleForm}>No tengo cuenta</button>
         <button type="submit" className="p-2 bg-purple-900 text-white rounded w-3/12">Iniciar sesión</button>

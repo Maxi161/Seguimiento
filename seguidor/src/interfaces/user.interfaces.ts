@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { IProcess } from "./process.interfaces";
 import { IApplication, IParsedApplication } from "./seguimiento.interface";
 
@@ -40,7 +41,10 @@ export interface UserContextType {
   onProcess: Partial<IProcess>;
   connections: IConnection[];
   conversations: IConversation[];
-  login: (credentials: { email: string; password: string }) => Promise<boolean>;
+  login: (credentials: {
+    email: string;
+    password: string;
+  }) => Promise<boolean | AxiosError>;
   register: (newUser: {
     name: string;
     email: string;
@@ -61,4 +65,5 @@ export interface UserContextType {
   getPendingConnections: (id: string) => Promise<IConnection[]>;
   getMessagesWith: (userAID: string, userBID: string) => Promise<void>;
   getApplications: (email: string) => Promise<void>;
+  updateApp: (app: IParsedApplication) => Promise<void>;
 }

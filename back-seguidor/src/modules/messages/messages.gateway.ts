@@ -27,6 +27,8 @@ export class MessageGateway {
 
   handleConnection(@ConnectedSocket() client: Socket) {
     console.log(`Client connected: ${client.id}`);
+    const sockets = [...this.connectedUsers.entries()];
+    console.log(sockets);
   }
 
   handleDisconnect(@ConnectedSocket() client: Socket) {
@@ -39,11 +41,20 @@ export class MessageGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() userId: string,
   ) {
-    if (!this.connectedUsers.has(userId)) {
-      console.log('un cliente ha entrado al chat ', userId);
-      this.connectedUsers.set(userId, client.id);
-      client.join(userId);
+    const previousSocketId = this.connectedUsers.get(userId);
+
+    // Si el usuario ya estaba conectado, cierra la conexión previa
+    if (previousSocketId) {
+      const previousSocket = this.server.sockets.sockets.get(previousSocketId);
+      if (previousSocket) {
+        previousSocket.disconnect();
+      }
     }
+
+    // Registra la nueva conexión
+    console.log('Un cliente ha entrado al chat', userId, client.id);
+    this.connectedUsers.set(userId, client.id);
+    client.join(userId);
   }
 
   @SubscribeMessage('send-message')

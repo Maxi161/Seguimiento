@@ -10,6 +10,8 @@ export interface IFormErrors {
   email?: string;
   password?: string;
   confirmPassword?: string;
+  unauthorized?: boolean;
+  userNotFound?: boolean;
 }
 
 export interface IApplicationFormErrors {

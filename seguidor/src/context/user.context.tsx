@@ -22,6 +22,7 @@ export const UserContext = createContext<UserContextType>({
   getPendingConnections: async () => [],
   getMessagesWith: async () => {},
   getApplications: async () => {},
+  updateApp: async () => {}
 });
 
 export const useUserContext = () => useContext(UserContext);

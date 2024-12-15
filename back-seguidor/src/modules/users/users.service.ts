@@ -32,8 +32,8 @@ export class UserService {
   }
 
   async signin(email: string, password: string) {
-    const res = await this.userRepo.signin(email, password);
+    const { userData, token } = await this.userRepo.signin(email, password);
 
-    return res;
+    return { userData, token };
   }
 }

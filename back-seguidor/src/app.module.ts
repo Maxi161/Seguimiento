@@ -7,6 +7,8 @@ import { UserModule } from './modules/users/users.module';
 import { ApplicationModule } from './modules/application/application.module';
 import { ConnectionModule } from './modules/connections/connection.module';
 import { MessageModule } from './modules/messages/messages.module';
+import { JwtModule } from '@nestjs/jwt';
+import { JWT_SECRET } from './config/env.config';
 
 @Module({
   imports: [
@@ -16,6 +18,10 @@ import { MessageModule } from './modules/messages/messages.module';
     ApplicationModule,
     MessageModule,
     ConnectionModule,
+    JwtModule.register({
+      global: true,
+      secret: JWT_SECRET,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -119,17 +119,7 @@ const MenuDrawer = () => {
           </ListItem>
         ))}
       </List>
-      <Divider className="bg-purple-800" />
-      <List>
-        {list2.map((item, index) => (
-          <ListItem key={`${item.text}-${index}`} disablePadding>
-            <ListItemButton onClick={item.handler}>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+      {user?.role === "coach" ? <>
       <Divider className="bg-purple-800" />
       <List>
         <ListItem disablePadding>
@@ -148,6 +138,18 @@ const MenuDrawer = () => {
             <ListItemText primary={"seguimiento de alumnos"} />
           </ListItemButton>
         </ListItem>
+      </List>
+      </> : null}
+      <Divider className="bg-purple-800" />
+      <List>
+        {list2.map((item, index) => (
+          <ListItem key={`${item.text}-${index}`} disablePadding>
+            <ListItemButton onClick={item.handler}>
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
       </List>
     </Box>
   );
