@@ -13,6 +13,7 @@ import {
 } from "@nextui-org/react";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
+import EditableCell from "./EditableCell";
 
 const FollowView = ({ toggleView, withButtons, rechargeButton, handleReload, userSeguimiento}: { 
   toggleView?: () => void;
@@ -24,7 +25,7 @@ const FollowView = ({ toggleView, withButtons, rechargeButton, handleReload, use
 }) => {
   const [ downloadStates, setDownloadStates] = React.useState<Record<string, boolean>>({});
   const [ isReloading, setIsReloading ] = useState(false)
-  const { user, downloadData } = useUserContext();
+  const { user, downloadData, updateApp } = useUserContext();
   const appsAmount = React.useMemo(() => {
     if (Array.isArray(userSeguimiento?.applications)) {
       return userSeguimiento.applications.length;
@@ -49,6 +50,17 @@ const FollowView = ({ toggleView, withButtons, rechargeButton, handleReload, use
     return applications.slice(start, end) || [];
   }, [page, applications]);
 
+  const handlerSaveEdit = async (newApp: IParsedApplication, oldApp: IParsedApplication) => {
+    console.log(newApp)
+    console.log(oldApp)
+    console.log(JSON.stringify(newApp) === JSON.stringify(oldApp))
+
+    if (JSON.stringify(newApp) !== JSON.stringify(oldApp)) {
+      const index = items.findIndex((app) => oldApp.id === app.id)
+      if(index) items[index] = newApp
+      await updateApp(newApp)
+    }
+  }
 
   const columns = [
     { key: "id", label: "ID" },
@@ -98,13 +110,30 @@ const FollowView = ({ toggleView, withButtons, rechargeButton, handleReload, use
             {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
           </TableHeader>
           <TableBody emptyContent="Ningún seguimiento para mostrar">
-            {items.map((item, index) => (
-              <TableRow key={`${item.id}-${index}`}>
-                {columns.map((column) => (
-                  <TableCell key={`${column.key}-${index}`}>{getKeyValue(item, column.key)}</TableCell>
-                ))}
-              </TableRow>
-            ))}
+          {items.map((item, index) => (
+  <TableRow key={`${item.id}-${index}`}>
+    {columns.map((column) => {
+      const isEditable = column.key !== "id"; // Ajusta las columnas editables
+      const isDate = ["applicationDate", "firstInterview", "secondInterview", "thirdInterview", "extraInterview", "phoneScreen"].some((keyDate) => keyDate === column.key)
+      return (
+        <TableCell key={`${column.key}-${index}`}>
+          {isEditable ? (
+            <EditableCell
+              initialValue={getKeyValue(item, column.key)}
+              typeCell={isDate ? "date" : "string"}
+              onSave={(newValue) => {
+                handlerSaveEdit({...item, [column.key]: newValue}, item)
+              }}
+            />
+          ) : (
+            getKeyValue(item, column.key)
+          )}
+        </TableCell>
+      );
+    })}
+  </TableRow>
+))}
+
           </TableBody>
         </Table>
       </motion.div>

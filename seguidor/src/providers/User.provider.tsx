@@ -4,16 +4,16 @@ import { UserContext } from "@/context/user.context";
 import { IProcess } from "@/interfaces/process.interfaces";
 import { IApplication, IParsedApplication } from "@/interfaces/seguimiento.interface";
 import { IConnection, IConversation, IMessage, IUser } from "@/interfaces/user.interfaces";
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
 // const rutaApi0 = "https://seguimiento-13h8.onrender.com";
 
-// const rutaAPi = "http://localhost:3005";
+const rutaApi = "http://localhost:3005";
 
-const rutaApi = "https://seguimiento-4rct.onrender.com";
+// const rutaApi = "https://seguimiento-4rct.onrender.com";
 
 const socket = io(`${rutaApi}/message`, {
   reconnectionAttempts: 5,
@@ -24,6 +24,7 @@ const socket = io(`${rutaApi}/message`, {
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<IUser | null>(null);
+  const [token, setToken] = useState("")
   const [isLogged, setIsLogged] = useState(false);
   const [loading, setLoading] = useState(true);  // Indicando carga de datos inicial
   const [onProcess, setOnProcess] = useState<IProcess>({
@@ -79,9 +80,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
   
   
-
-
-
   // Función para manejar la conexión de WebSocket
   const initializeWebSocket = (userId: string) => {
     if (userId && !webSocketStatus) {
@@ -185,7 +183,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         });
         const { data } = await axios.post(`${rutaApi}/user/signin`, { ...credentials });
-        const user: IUser = data;
+        const user: IUser = data.userData;
+        setToken(data.token ?? "")
         user.friends = await mapConnectionsToFriends(user);
         setUser(user);
         setIsLogged(true);
@@ -199,15 +198,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         getConnections(user?.id as string)
         return true;
       } catch (error) {
-        console.error(error);
         setOnProcess((prevProcess) => {
           return {
             ...prevProcess,
             login: false
           }
         });
-        alert("Error en el login");
-        return false;
+        if(isAxiosError(error)) throw error
+        return false
       }
     }
     return false
@@ -235,10 +233,17 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         });
         const data = { ...formData, userId: user?.id };
-        await axios.post(`${rutaApi}/application`, { ...data });
-  
-        const res = await axios.get(`${rutaApi}/application/${user?.email}`);
-        const apps = res.data as IApplication[];
+        const response = await axios.post(
+          `${rutaApi}/application`,
+          data, // Aquí van los datos del cuerpo
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Incluye el token aquí
+            },
+          }
+        );
+        
+        const apps = response.data as IApplication[]
         const updatedUser = { ...user, applications: [...apps] } as IUser;
         setUser(updatedUser);
         saveUserToLocalStorage(updatedUser);
@@ -268,8 +273,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ...prevProcess,
           getApps: true,
         }));
-  
-        const res = await axios.get(`${rutaApi}/application/${email}`);
+        const res = await axios.get(`${rutaApi}/application/${email}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });        
         const data: IParsedApplication[] = res.data || []; // Asignamos un arreglo vacío en caso de que no haya datos.
   
         const student: IUser | undefined = user?.friends.find((user) => user.email === email);
@@ -290,7 +298,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }));
       } catch (err) {
         console.log(err);
-  
+        console.log(token)
         // Desmarcar el estado de procesamiento en caso de error
         setOnProcess((prevProcess) => ({
           ...prevProcess,
@@ -300,6 +308,33 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   
+  const updateApp = async (app: IParsedApplication) => {
+    try {
+      const res = await axios.put(`${rutaApi}/application`, {
+        ...app,
+        headers: {
+          ["authorization"]: token
+        }
+      })
+      const { data } = res;
+      const appIndex = user?.applications.findIndex(application => application.id === app.id);
+
+      if(!appIndex) throw new Error(`App ${app.id} was not found`)
+      if(!user) throw new Error("user not found")
+
+      const newApps = [...user.applications]
+      newApps[appIndex] = {...data}
+
+      setUser((prevData) => {
+        return {
+          ...prevData,
+          applications: [...newApps]
+        } as IUser
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   // Register new user logic
   const register = async (newUser: { name: string; email: string; password: string; confirmPassword: string }) => {
@@ -554,21 +589,28 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedUser) {
       setUser(storedUser);
       setIsLogged(true);
+      initializeWebSocket(storedUser.id);
+      console.log("Usuario cargado y WebSocket inicializado.");
     }
+  
     setLoading(false);
+  
+    return () => {
+      if (storedUser) {
+        console.log("Se ejecutó el cleanup.");
+        logout();
+      }
+    };
   }, []);
-
 
   useEffect(() => {
     if (user) {
-      initializeWebSocket(user.id);
-
-      return () => {
-        closeWebSocketConnection(user.id);
-      };
+      saveUserToLocalStorage(user);
+      console.log("Usuario actualizado y almacenado en localStorage.");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+  
+  
 
   return (
     <UserContext.Provider
@@ -592,6 +634,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         getPendingConnections,
         getMessagesWith,
         getApplications,
+        updateApp,
       }}
     >
       {children}

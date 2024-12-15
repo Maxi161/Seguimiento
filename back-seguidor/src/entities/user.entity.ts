@@ -3,11 +3,7 @@ import { Application } from './application.entity';
 import { v4 as uuid } from 'uuid';
 import { Message } from './message.entity';
 import { Connection } from './connections.entity';
-
-export enum UserRole {
-  STUDENT = 'student',
-  COACH = 'coach',
-}
+import { Role } from 'src/helpers/roles.enum';
 
 @Entity()
 export class User {
@@ -23,8 +19,8 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.STUDENT })
-  role: UserRole;
+  @Column({ type: 'enum', enum: Role, default: Role.STUDENT })
+  role: Role;
 
   @OneToMany(() => Application, (application) => application.user, {
     cascade: true,

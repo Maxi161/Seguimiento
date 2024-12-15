@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  BeforeInsert,
 } from 'typeorm';
 import { User } from './user.entity';
 import { v4 as uuid } from 'uuid';
@@ -25,7 +26,7 @@ export class Application {
   @Column()
   comments: string;
 
-  @Column({ type: 'date', nullable: true, default: new Date() })
+  @Column({ type: 'date', nullable: true })
   applicationDate: Date;
 
   // Contact fields
@@ -65,4 +66,11 @@ export class Application {
   @ManyToOne(() => User, (user) => user.applications)
   @JoinColumn()
   user: User;
+
+  @BeforeInsert()
+  setApplicationDate() {
+    if (!this.applicationDate) {
+      this.applicationDate = new Date();
+    }
+  }
 }

@@ -41,4 +41,9 @@ export class ApplicationService {
 
     return await this.appRepo.createApplication(newData);
   }
+
+  async updateApp(app: Partial<Application>) {
+    const res = await this.appRepo.updateApp(app);
+    return res;
+  }
 }
