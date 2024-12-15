@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { IUser } from "@/interfaces/user.interfaces";
 import { Input, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, User } from "@nextui-org/react";
