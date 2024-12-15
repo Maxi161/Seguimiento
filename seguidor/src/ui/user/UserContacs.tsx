@@ -1,3 +1,5 @@
+"use client"
+
 import { useUserContext } from "@/context/user.context";
 import { IUser } from "@/interfaces/user.interfaces";
 import { User } from "@nextui-org/react";

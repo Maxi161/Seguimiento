@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState } from "react";
 
 const EditableCell = ({ initialValue, onSave, typeCell }: { typeCell?: string; initialValue: string; onSave: (value: string) => void }) => {

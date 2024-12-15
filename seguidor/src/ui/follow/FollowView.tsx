@@ -1,3 +1,5 @@
+"use client"
+
 import { useUserContext } from "@/context/user.context"; 
 import { IParsedApplication } from "@/interfaces/seguimiento.interface";
 import { IUser } from "@/interfaces/user.interfaces";
