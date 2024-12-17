@@ -1,6 +1,7 @@
 "use client";
 import { useUserContext } from "@/context/user.context";
 import { IUser } from "@/interfaces/user.interfaces";
+import AdBanner from "@/ui/ads/AdBanner";
 import FollowView from "@/ui/follow/FollowView";
 import Footer from "@/ui/footer/Footer";
 import ApplicationForm from "@/ui/form/FormSeguimiento";
@@ -54,6 +55,10 @@ export default function Home() {
           ) : (
             <FollowView toggleView={toggleView} withButtons={true}/>
           )}
+        </section>
+        <section id="ad" className="bg-red-800 h-auto w-8/12 p-7 flex flex-row relative">
+          <AdBanner dataAdFormat="auto" dataAdSlot="AquiVaElIdDeLaColleccionDeAnuncios" dataFullWidthResponsive={true}></AdBanner>
+          <span className="absolute left-[44%] top-[30%]">Ad placeholder</span>
         </section>
         <section>
           <InfoProject />

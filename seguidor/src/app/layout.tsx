@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { UserProvider } from "@/providers/User.provider";
+import Adsense from "@/ui/ads/Adsense";
+import { ADSENSE_PUBLIC_ID } from "@/config/env.config";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,9 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5719304264135225"
-      crossOrigin="anonymous">
-      </script>
+        <Adsense pId={ADSENSE_PUBLIC_ID ?? ""}/>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
