@@ -45,7 +45,8 @@ export class MessageGateway {
 
     // Si el usuario ya estaba conectado, cierra la conexión previa
     if (previousSocketId) {
-      const previousSocket = this.server.sockets.sockets.get(previousSocketId);
+      const previousSocket =
+        this.server?.sockets?.sockets?.get(previousSocketId);
       if (previousSocket) {
         previousSocket.disconnect();
       }
